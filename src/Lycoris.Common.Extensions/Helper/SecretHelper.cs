@@ -1,9 +1,9 @@
-﻿using Lycoris.Base.Extensions;
+﻿using Lycoris.Common.Extensions.Extensions;
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Lycoris.Base.Helper
+namespace Lycoris.Common.Extensions.Helper
 {
     /// <summary>
     /// 

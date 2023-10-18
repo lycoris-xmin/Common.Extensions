@@ -1,7 +1,7 @@
-﻿using Lycoris.Base.Extensions;
+﻿using Lycoris.Common.Extensions.Extensions;
 using Microsoft.Extensions.Configuration;
 
-namespace Lycoris.Base.ConfigurationManager
+namespace Lycoris.Common.Extensions.ConfigurationManager
 {
     /// <summary>
     /// 
@@ -41,7 +41,7 @@ namespace Lycoris.Base.ConfigurationManager
             if (Configuration == null)
                 throw new ArgumentNullException(nameof(Configuration));
 
-            var value = ConfigurationBinder.GetValue(Configuration, key, defaultValue);
+            var value = Configuration.GetValue(key, defaultValue);
 
             return !value.IsNullOrEmpty() ? value.Trim() : defaultValue.Trim();
         }
@@ -59,7 +59,7 @@ namespace Lycoris.Base.ConfigurationManager
 
             try
             {
-                return GetConfig(key, defaultValue);
+                return key.GetConfig(defaultValue);
             }
             catch
             {
@@ -78,7 +78,7 @@ namespace Lycoris.Base.ConfigurationManager
             if (Configuration == null)
                 throw new ArgumentNullException(nameof(Configuration));
 
-            var config = ConfigurationBinder.GetValue<T>(Configuration, key);
+            var config = Configuration.GetValue<T>(key);
             config ??= default;
             return config;
         }
@@ -95,7 +95,7 @@ namespace Lycoris.Base.ConfigurationManager
             if (Configuration == null)
                 throw new ArgumentNullException(nameof(Configuration));
 
-            var config = ConfigurationBinder.GetValue<T>(Configuration, key);
+            var config = Configuration.GetValue<T>(key);
             config ??= defaultValue;
             return config;
         }
@@ -110,7 +110,7 @@ namespace Lycoris.Base.ConfigurationManager
         {
             try
             {
-                return GetConfig<T>(key);
+                return key.GetConfig<T>();
             }
             catch
             {
@@ -129,7 +129,7 @@ namespace Lycoris.Base.ConfigurationManager
         {
             try
             {
-                return GetConfig(key, defaultValue);
+                return key.GetConfig(defaultValue);
             }
             catch
             {
@@ -178,7 +178,7 @@ namespace Lycoris.Base.ConfigurationManager
             if (Configuration == null)
                 throw new ArgumentNullException(nameof(Configuration));
 
-            var value = ConfigurationBinder.Get<T>(Configuration!.GetSection(key));
+            var value = Configuration!.GetSection(key).Get<T>();
             return value ?? default;
         }
 
@@ -212,7 +212,7 @@ namespace Lycoris.Base.ConfigurationManager
             if (Configuration == null)
                 throw new ArgumentNullException(nameof(Configuration));
 
-            var value = ConfigurationBinder.Get<T>(Configuration!.GetSection(key));
+            var value = Configuration!.GetSection(key).Get<T>();
             return value ?? defaultValue;
         }
 
@@ -227,7 +227,7 @@ namespace Lycoris.Base.ConfigurationManager
         {
             try
             {
-                return GetSection<T>(key, defaultValue);
+                return GetSection(key, defaultValue);
             }
             catch
             {

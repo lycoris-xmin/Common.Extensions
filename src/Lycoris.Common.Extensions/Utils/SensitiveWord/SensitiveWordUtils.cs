@@ -1,9 +1,9 @@
-﻿using Lycoris.Base.Extensions;
+﻿using Lycoris.Common.Extensions.Extensions;
 using Lycoris.Common.Extensions.Properties;
 using System.Collections;
 using System.Text;
 
-namespace Lycoris.Base.Utils.SensitiveWord
+namespace Lycoris.Common.Extensions.Utils.SensitiveWord
 {
     /// <summary>
     /// 
@@ -263,12 +263,104 @@ namespace Lycoris.Base.Utils.SensitiveWord
         public string SensitiveWordsReplace(string input, char replaceStr = '*') => SensitiveWordsReplace(WordsFilter, input, replaceStr);
 
         /// <summary>
+        /// 隐藏敏感信息
+        /// </summary>
+        /// <param name="info">信息实体</param>
+        /// <param name="left">左边保留的字符数</param>
+        /// <param name="right">右边保留的字符数</param>
+        /// <param name="basedOnLeft">当长度异常时，是否显示左边 </param>
+        /// <returns></returns>
+        public static string HideSensitiveInfo(string info, int left, int right, bool basedOnLeft = true)
+        {
+            if (string.IsNullOrEmpty(info))
+                return "";
+
+            var sbText = new StringBuilder();
+            int hiddenCharCount = info.Length - left - right;
+            if (hiddenCharCount > 0)
+            {
+                string prefix = info[..left], suffix = info[^right..];
+                sbText.Append(prefix);
+                for (int i = 0; i < hiddenCharCount; i++)
+                {
+                    sbText.Append('*');
+                }
+                sbText.Append(suffix);
+            }
+            else
+            {
+                if (basedOnLeft)
+                {
+                    if (info.Length > left && left > 0)
+                    {
+                        sbText.Append(info[..left] + "****");
+                    }
+                    else
+                    {
+                        sbText.Append(info[..1] + "****");
+                    }
+                }
+                else
+                {
+                    if (info.Length > right && right > 0)
+                    {
+                        sbText.Append(string.Concat("****", info.AsSpan(info.Length - right)));
+                    }
+                    else
+                    {
+                        sbText.Append(string.Concat("****", info.AsSpan(info.Length - 1)));
+                    }
+                }
+            }
+            return sbText.ToString();
+        }
+
+        /// <summary>
+        /// 隐藏敏感信息
+        /// </summary>
+        /// <param name="info">信息</param>
+        /// <param name="sublen">信息总长与左子串（或右子串）的比例</param>
+        /// <param name="basedOnLeft">当长度异常时，是否显示左边，默认true，默认显示左边</param>
+        /// <code>true</code>显示左边，<code>false</code>显示右边
+        /// <returns></returns>
+        public static string HideSensitiveInfo(string info, int sublen = 3, bool basedOnLeft = true)
+        {
+            if (string.IsNullOrEmpty(info))
+            {
+                return "";
+            }
+            if (sublen <= 1)
+            {
+                sublen = 3;
+            }
+            int subLength = info.Length / sublen;
+            if (subLength > 0 && info.Length > subLength * 2)
+            {
+                string prefix = info[..subLength], suffix = info[^subLength..];
+                return prefix + "****" + suffix;
+            }
+            else
+            {
+                if (basedOnLeft)
+                {
+                    string prefix = subLength > 0 ? info[..subLength] : info[..1];
+                    return prefix + "****";
+                }
+                else
+                {
+                    string suffix = subLength > 0 ? info[^subLength..] : info[^1..];
+                    return "****" + suffix;
+                }
+            }
+        }
+
+        /// <summary>
         /// 设置内存缓存记忆库 之后可使用 <see cref="SensitiveWordMemoryStore"/> 全局实例进行其他操作
         /// </summary>
         public void AsMempryStore()
         {
-            SensitiveWordMemoryStore.Words = this.Words;
-            SensitiveWordMemoryStore.WordsFilter = this.WordsFilter;
+            SensitiveWordMemoryStore.Words = Words;
+            SensitiveWordMemoryStore.WordsFilter = WordsFilter;
         }
 
         /// <summary>

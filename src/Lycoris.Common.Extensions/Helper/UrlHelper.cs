@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace Lycoris.Base.Helper
+namespace Lycoris.Common.Extensions.Helper
 {
     /// <summary>
     /// 

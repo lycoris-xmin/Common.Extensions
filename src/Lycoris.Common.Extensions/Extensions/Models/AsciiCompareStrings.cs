@@ -1,4 +1,4 @@
-﻿namespace Lycoris.Base.Extensions.Models
+﻿namespace Lycoris.Common.Extensions.Extensions.Models
 {
     /// <summary>
     /// ascii码排序

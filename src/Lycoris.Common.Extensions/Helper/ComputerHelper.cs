@@ -1,8 +1,8 @@
-﻿using Lycoris.Base.Extensions;
-using Lycoris.Base.Helper.Models;
+﻿using Lycoris.Common.Extensions.Extensions;
+using Lycoris.Common.Extensions.Helper.Models;
 using System.Runtime.InteropServices;
 
-namespace WaterCloud.Code
+namespace Lycoris.Common.Extensions.Helper
 {
     /// <summary>
     /// 

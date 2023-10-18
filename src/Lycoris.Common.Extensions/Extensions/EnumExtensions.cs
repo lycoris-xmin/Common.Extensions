@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Lycoris.Base.Extensions
+namespace Lycoris.Common.Extensions.Extensions
 {
     /// <summary>
     /// 

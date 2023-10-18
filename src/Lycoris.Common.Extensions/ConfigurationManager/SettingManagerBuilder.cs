@@ -1,7 +1,7 @@
-﻿using Lycoris.Base.Extensions;
+﻿using Lycoris.Common.Extensions.Extensions;
 using Microsoft.Extensions.Configuration;
 
-namespace Lycoris.Base.ConfigurationManager
+namespace Lycoris.Common.Extensions.ConfigurationManager
 {
     /// <summary>
     /// 
@@ -16,7 +16,7 @@ namespace Lycoris.Base.ConfigurationManager
         /// <param name="jsonFilePath"></param>
         public void AddJsonConfiguration(string jsonFilePath)
         {
-            this.JsonFilePath = jsonFilePath;
+            JsonFilePath = jsonFilePath;
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace Lycoris.Base.ConfigurationManager
         /// <param name="configure"></param>
         public void AddJsonConfiguration(Func<string> configure)
         {
-            this.JsonFilePath = configure();
+            JsonFilePath = configure();
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace Lycoris.Base.ConfigurationManager
         /// <returns></returns>
         public SettingManagerBuilder AddJsonConfigurationWithEnvironment(string variable, Func<string, string> configure)
         {
-            this.JsonFilePath = configure(Environment.GetEnvironmentVariable(variable) ?? "");
+            JsonFilePath = configure(Environment.GetEnvironmentVariable(variable) ?? "");
             return this;
         }
 
@@ -53,10 +53,10 @@ namespace Lycoris.Base.ConfigurationManager
         /// <returns></returns>
         internal IConfiguration BuildIConfiguration()
         {
-            if (this.JsonFilePath.IsNullOrEmpty())
-                throw new ArgumentNullException(nameof(this.JsonFilePath));
+            if (JsonFilePath.IsNullOrEmpty())
+                throw new ArgumentNullException(nameof(JsonFilePath));
 
-            return JsonConfigurationExtensions.AddJsonFile(FileConfigurationExtensions.SetBasePath(new ConfigurationBuilder(), Directory.GetCurrentDirectory()), this.JsonFilePath, true).Build();
+            return new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile(JsonFilePath, true).Build();
         }
     }
 }

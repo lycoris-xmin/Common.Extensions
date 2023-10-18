@@ -1,8 +1,8 @@
-﻿using Lycoris.Base.Extensions;
-using Lycoris.Base.Extensions.Models;
+﻿using Lycoris.Common.Extensions.Extensions;
+using Lycoris.Common.Extensions.Extensions.Models;
 using System.Linq.Expressions;
 
-namespace Lycoris.Base.Extensions
+namespace Lycoris.Common.Extensions.Extensions
 {
     /// <summary>
     /// linq部分常用扩展

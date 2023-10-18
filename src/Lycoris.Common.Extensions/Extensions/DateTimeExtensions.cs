@@ -1,4 +1,4 @@
-﻿namespace Lycoris.Base.Extensions
+﻿namespace Lycoris.Common.Extensions.Extensions
 {
     /// <summary>
     /// 时间扩展

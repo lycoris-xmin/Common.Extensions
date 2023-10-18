@@ -1,4 +1,4 @@
-﻿namespace Lycoris.Base.Extensions
+﻿namespace Lycoris.Common.Extensions.Extensions
 {
     internal class TypeTools
     {

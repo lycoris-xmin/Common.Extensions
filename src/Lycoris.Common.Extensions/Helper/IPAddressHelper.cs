@@ -1,9 +1,9 @@
-﻿using Lycoris.Base.Extensions;
+﻿using Lycoris.Common.Extensions.Extensions;
 using Lycoris.Common.Extensions.Properties;
 using System.Net;
 using System.Text;
 
-namespace Lycoris.Base.Helper
+namespace Lycoris.Common.Extensions.Helper
 {
     /// <summary>
     /// IP地址转换工具类

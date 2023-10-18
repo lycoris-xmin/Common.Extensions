@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace Lycoris.Base.Helper.Models
+namespace Lycoris.Common.Extensions.Helper.Models
 {
     /// <summary>
     /// 

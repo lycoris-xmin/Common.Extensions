@@ -1,7 +1,7 @@
-﻿using Lycoris.Base.Extensions;
+﻿using Lycoris.Common.Extensions.Extensions;
 using System.Collections;
 
-namespace Lycoris.Base.Utils.SensitiveWord
+namespace Lycoris.Common.Extensions.Utils.SensitiveWord
 {
     /// <summary>
     /// 

@@ -1,8 +1,8 @@
-﻿using Lycoris.Base.Extensions;
-using Lycoris.Base.Helper.Models;
+﻿using Lycoris.Common.Extensions.Extensions;
+using Lycoris.Common.Extensions.Helper.Models;
 using System.Text.RegularExpressions;
 
-namespace Lycoris.Base.Helper
+namespace Lycoris.Common.Extensions.Helper
 {
     /// <summary>
     /// 

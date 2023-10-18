@@ -1,7 +1,7 @@
-﻿using Lycoris.Base.Http.Options;
+﻿using Lycoris.Common.Extensions.Http.Options;
 using System.Net;
 
-namespace Lycoris.Base.Http
+namespace Lycoris.Common.Extensions.Http
 {
     /// <summary>
     /// 

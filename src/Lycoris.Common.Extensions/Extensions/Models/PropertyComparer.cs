@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Lycoris.Base.Extensions.Models
+namespace Lycoris.Common.Extensions.Extensions.Models
 {
     /// <summary>
     /// 

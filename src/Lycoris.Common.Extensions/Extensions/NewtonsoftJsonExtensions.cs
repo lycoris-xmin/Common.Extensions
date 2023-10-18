@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using System.Reflection;
 
-namespace Lycoris.Base.Extensions
+namespace Lycoris.Common.Extensions.Extensions
 {
     /// <summary>
     /// json 扩展

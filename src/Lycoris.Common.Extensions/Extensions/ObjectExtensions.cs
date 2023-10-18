@@ -1,7 +1,7 @@
-﻿using Lycoris.Base.Extensions.Models;
+﻿using Lycoris.Common.Extensions.Extensions.Models;
 using System.Reflection;
 
-namespace Lycoris.Base.Extensions
+namespace Lycoris.Common.Extensions.Extensions
 {
     /// <summary>
     /// 

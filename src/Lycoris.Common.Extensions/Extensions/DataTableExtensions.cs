@@ -1,9 +1,9 @@
-﻿using Lycoris.Base.Extensions;
+﻿using Lycoris.Common.Extensions.Extensions;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Reflection;
 
-namespace Lycoris.Base.Extensions
+namespace Lycoris.Common.Extensions.Extensions
 {
     /// <summary>
     /// 

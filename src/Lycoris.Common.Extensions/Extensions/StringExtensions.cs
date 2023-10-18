@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 
-namespace Lycoris.Base.Extensions
+namespace Lycoris.Common.Extensions.Extensions
 {
     /// <summary>
     /// 
@@ -25,7 +25,7 @@ namespace Lycoris.Base.Extensions
         /// <returns></returns>
         public static int? ToTryInt(this string? str)
         {
-            str = CheckInput(str);
+            str = str.CheckInput();
             if (str == null)
                 return null;
 
@@ -49,7 +49,7 @@ namespace Lycoris.Base.Extensions
         /// <returns></returns>
         public static long? ToTryLong(this string? str)
         {
-            str = CheckInput(str);
+            str = str.CheckInput();
             if (str == null)
                 return null;
 
@@ -73,7 +73,7 @@ namespace Lycoris.Base.Extensions
         /// <returns></returns>
         public static float? ToTryFloat(this string? str)
         {
-            str = CheckInput(str);
+            str = str.CheckInput();
             if (str == null)
                 return null;
 
@@ -97,7 +97,7 @@ namespace Lycoris.Base.Extensions
         /// <returns></returns>
         public static double? ToTryDouble(this string? str)
         {
-            str = CheckInput(str);
+            str = str.CheckInput();
             if (str == null)
                 return null;
 
@@ -121,7 +121,7 @@ namespace Lycoris.Base.Extensions
         /// <returns></returns>
         public static decimal? ToTryDecimal(this string? str)
         {
-            str = CheckInput(str);
+            str = str.CheckInput();
             if (str == null)
                 return null;
 
@@ -150,7 +150,7 @@ namespace Lycoris.Base.Extensions
         /// <returns></returns>
         public static decimal? ToTryDecimal(this string? str, int dclength)
         {
-            str = CheckInput(str);
+            str = str.CheckInput();
             if (str == null)
                 return null;
 

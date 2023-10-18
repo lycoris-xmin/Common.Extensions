@@ -1,7 +1,6 @@
-﻿using Lycoris.Base.Extensions;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
-namespace Lycoris.Base.Extensions
+namespace Lycoris.Common.Extensions.Extensions
 {
     /// <summary>
     /// 

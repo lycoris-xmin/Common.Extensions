@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace WaterCloud.Code
+namespace Lycoris.Common.Extensions.Helper
 {
     /// <summary>
     /// 

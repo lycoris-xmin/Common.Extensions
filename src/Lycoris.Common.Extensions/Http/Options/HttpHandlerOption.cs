@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace Lycoris.Base.Http.Options
+namespace Lycoris.Common.Extensions.Http.Options
 {
     /// <summary>
     /// 描述为处理服务请求而创建的 http 处理程序的配置参数

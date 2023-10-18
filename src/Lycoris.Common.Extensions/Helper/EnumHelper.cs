@@ -1,4 +1,4 @@
-﻿namespace Lycoris.Base.Helper
+﻿namespace Lycoris.Common.Extensions.Helper
 {
     /// <summary>
     /// 

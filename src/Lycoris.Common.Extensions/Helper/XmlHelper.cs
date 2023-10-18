@@ -1,7 +1,7 @@
 ﻿using System.Xml;
 using System.Xml.Serialization;
 
-namespace Lycoris.Base.Helper
+namespace Lycoris.Common.Extensions.Helper
 {
     /// <summary>
     /// 

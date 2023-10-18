@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace Lycoris.Base.Http.Options
+namespace Lycoris.Common.Extensions.Http.Options
 {
     /// <summary>
     /// 

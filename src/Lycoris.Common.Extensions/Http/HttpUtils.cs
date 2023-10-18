@@ -1,11 +1,11 @@
-﻿using Lycoris.Base.Extensions;
-using Lycoris.Base.Http.Options;
+﻿using Lycoris.Common.Extensions.Extensions;
+using Lycoris.Common.Extensions.Http.Options;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Web;
 
-namespace Lycoris.Base.Http
+namespace Lycoris.Common.Extensions.Http
 {
     /// <summary>
     /// 
@@ -162,7 +162,7 @@ namespace Lycoris.Base.Http
         public HttpUtils AddRequestHeader(string key, string value)
         {
             if (ContentTypeKey.Contains(key.ToLower()))
-                this.ContentType = value;
+                ContentType = value;
 
             Headers ??= new Dictionary<string, string>();
             Headers.Add(key, value);

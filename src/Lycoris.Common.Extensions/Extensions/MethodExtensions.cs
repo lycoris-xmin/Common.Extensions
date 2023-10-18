@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Lycoris.Base.Extensions
+namespace Lycoris.Common.Extensions.Extensions
 {
     /// <summary>
     /// 

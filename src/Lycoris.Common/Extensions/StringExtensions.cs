@@ -9,6 +9,7 @@ using Lycoris.Common.Extensions;
 using Lycoris.Common.Extensions.Extensions;
 using System.Diagnostics.CodeAnalysis;
 */
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -523,5 +524,28 @@ namespace Lycoris.Common.Extensions
 
             return str!.Replace("\0", "");
         }
+
+        #region 枚举
+        /// <summary>
+        /// 通过枚举文字描述获取枚举项
+        /// </summary>
+        /// <typeparam name="T">枚举类型</typeparam>
+        /// <param name="description">枚举的文字描述</param>
+        /// <returns>返回枚举项</returns>
+        public static T? ToEnumByDescription<T>(string description) where T : struct
+        {
+            Type type = typeof(T);
+            if (!type.IsEnum)
+                throw new ArgumentException();
+
+            var fields = type.GetFields();
+
+            var field = fields.SelectMany(f => f.GetCustomAttributes(typeof(DescriptionAttribute), false), (f, a) => new { Field = f, Att = a })
+                              .Where(a => ((DescriptionAttribute)a.Att).Description == description)
+                              .SingleOrDefault();
+
+            return field == null ? default : (T?)field.Field.GetRawConstantValue();
+        }
+        #endregion
     }
 }

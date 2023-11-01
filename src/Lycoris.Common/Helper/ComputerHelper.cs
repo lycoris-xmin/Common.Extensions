@@ -35,12 +35,12 @@ namespace Lycoris.Common.Helper
             string? cpuRate;
             if (IsUnix())
             {
-                string output = ShellHelper.Bash("top -b -n1 | grep \"Cpu(s)\" | awk '{print $2 + $4}'");
+                string output = ShellHelper.Bash.Run("top -b -n1 | grep \"Cpu(s)\" | awk '{print $2 + $4}'").Output;
                 cpuRate = output.Trim();
             }
             else
             {
-                string output = ShellHelper.Cmd("wmic", "cpu get LoadPercentage");
+                string output = ShellHelper.Cmd.RunApplication("wmic", "cpu get LoadPercentage");
                 cpuRate = output.Replace("LoadPercentage", string.Empty).Trim();
             }
             return cpuRate;
@@ -55,13 +55,13 @@ namespace Lycoris.Common.Helper
             DateTime? runTime = null;
             if (IsUnix())
             {
-                string output = ShellHelper.Bash("uptime -s");
+                string output = ShellHelper.Bash.Run("uptime -s").Output;
                 output = output.Trim();
                 runTime = output.ToTryDateTime();
             }
             else
             {
-                string output = ShellHelper.Cmd("wmic", "OS get LastBootUpTime/Value");
+                string output = ShellHelper.Cmd.RunApplication("wmic", "OS get LastBootUpTime/Value");
                 string[] outputArr = output.Split("=", StringSplitOptions.RemoveEmptyEntries);
                 if (outputArr.Length == 2)
                     runTime = outputArr[1].Split('.')[0].ToTryDateTime();
@@ -95,7 +95,7 @@ namespace Lycoris.Common.Helper
         /// <returns></returns>
         private static MemoryMetrics GetWindowsMetrics()
         {
-            string output = ShellHelper.Cmd("wmic", "OS get FreePhysicalMemory,TotalVisibleMemorySize /Value");
+            string output = ShellHelper.Cmd.RunApplication("wmic", "OS get FreePhysicalMemory,TotalVisibleMemorySize /Value");
 
             var lines = output.Trim().Split("\n");
             var freeMemoryParts = lines[0].Split("=", StringSplitOptions.RemoveEmptyEntries);
@@ -118,7 +118,7 @@ namespace Lycoris.Common.Helper
         /// <returns></returns>
         private static MemoryMetrics GetLinuxMetrics()
         {
-            string output = ShellHelper.Bash("free -m");
+            string output = ShellHelper.Bash.Run("free -m").Output;
 
             var lines = output.Split("\n");
             var memory = lines[1].Split(" ", StringSplitOptions.RemoveEmptyEntries);

@@ -4,9 +4,9 @@
 
 ```shell
 // net cli
-dotnet add package Lycoris.Common.Extensions
+dotnet add package Lycoris.Common
 // package manager
-Install-Package Lycoris.Common.Extensions
+Install-Package Lycoris.Common
 ```
 
 

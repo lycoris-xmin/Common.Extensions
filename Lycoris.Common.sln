@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{3BE2
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lycoris.Common", "src\Lycoris.Common\Lycoris.Common.csproj", "{9555F3B7-71FF-42A3-B6DF-ABCCC4DE4AB6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample", "samples\Sample\Sample.csproj", "{0DB02CE0-1CA7-444E-979D-9E33C8E2E7B4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,12 +21,17 @@ Global
 		{9555F3B7-71FF-42A3-B6DF-ABCCC4DE4AB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9555F3B7-71FF-42A3-B6DF-ABCCC4DE4AB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9555F3B7-71FF-42A3-B6DF-ABCCC4DE4AB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DB02CE0-1CA7-444E-979D-9E33C8E2E7B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DB02CE0-1CA7-444E-979D-9E33C8E2E7B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DB02CE0-1CA7-444E-979D-9E33C8E2E7B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DB02CE0-1CA7-444E-979D-9E33C8E2E7B4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{9555F3B7-71FF-42A3-B6DF-ABCCC4DE4AB6} = {9553A3D8-D620-445F-BB85-62F23C30EAAD}
+		{0DB02CE0-1CA7-444E-979D-9E33C8E2E7B4} = {3BE2A788-1AA9-48BB-A828-DCDE87100A02}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A4CF1CBF-2DD2-4B6F-9DEB-3955C5805EBA}

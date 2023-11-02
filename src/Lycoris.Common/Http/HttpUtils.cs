@@ -88,11 +88,6 @@ namespace Lycoris.Common.Http
         public Encoding ResponseEncoding { get; private set; } = Encoding.UTF8;
 
         /// <summary>
-        /// 
-        /// </summary>
-        public string UserAgent { get; private set; } = string.Empty;
-
-        /// <summary>
         /// ctor
         /// </summary>
         public HttpUtils() => RequestReset();
@@ -303,17 +298,6 @@ namespace Lycoris.Common.Http
         }
 
         /// <summary>
-        /// 设置
-        /// </summary>
-        /// <param name="UserAgent"></param>
-        /// <returns></returns>
-        public HttpUtils SetUserAgent(string UserAgent)
-        {
-            this.UserAgent = UserAgent;
-            return this;
-        }
-
-        /// <summary>
         /// HttpGet请求
         /// </summary>
         /// <returns></returns>
@@ -333,6 +317,8 @@ namespace Lycoris.Common.Http
                     return result;
                 }
 
+                result.HttpStatusCode = res.StatusCode;
+                result.Success = (int)result.HttpStatusCode < 300;
                 result.Content = await GetResponseBodyAsync(res.Content);
                 return result;
             }
@@ -364,11 +350,8 @@ namespace Lycoris.Common.Http
                 }
 
                 result.HttpStatusCode = res.StatusCode;
-
-                if (result.HttpStatusCode != HttpStatusCode.OK)
-                    result.Success = false;
-                else
-                    result.Content = await GetResponseBodyAsync(res.Content);
+                result.Success = (int)result.HttpStatusCode < 300;
+                result.Content = await GetResponseBodyAsync(res.Content);
             }
             catch (Exception ex)
             {
@@ -400,11 +383,8 @@ namespace Lycoris.Common.Http
                 }
 
                 result.HttpStatusCode = res.StatusCode;
-
-                if (result.HttpStatusCode != HttpStatusCode.OK)
-                    result.Success = false;
-                else
-                    result.Content = await GetResponseBodyAsync(res.Content);
+                result.Success = (int)result.HttpStatusCode < 300;
+                result.Content = await GetResponseBodyAsync(res.Content);
             }
             catch (Exception ex)
             {
@@ -436,11 +416,8 @@ namespace Lycoris.Common.Http
                 }
 
                 result.HttpStatusCode = res.StatusCode;
-
-                if (result.HttpStatusCode != HttpStatusCode.OK)
-                    result.Success = false;
-                else
-                    result.Content = await GetResponseBodyAsync(res.Content);
+                result.Success = (int)result.HttpStatusCode < 300;
+                result.Content = await GetResponseBodyAsync(res.Content);
             }
             catch (Exception ex)
             {
@@ -507,42 +484,13 @@ namespace Lycoris.Common.Http
         /// </summary>
         private void AddDefaultHeader()
         {
-            if (Request.Content == null)
-                Request.Headers.TryAddWithoutValidation("Cache-Control", "no-cache");
-            else if (Request.Content.Headers.Any(x => x.Key == "Cache-Control" && x.Value != null) == false)
-                Request.Content.Headers.TryAddWithoutValidation("Cache-Control", "no-cache");
-
-            if (Request.Content == null)
-                Request.Headers.TryAddWithoutValidation("Accept", "application/json");
-            else if (Request.Content.Headers.Any(x => x.Key == "Accept" && x.Value != null) == false)
-                Request.Content.Headers.TryAddWithoutValidation("Accept", "application/json");
-
-            if (Request.Content == null)
-            {
-                if (UserAgent.IsNullOrEmpty() == false)
-                    Request.Headers.TryAddWithoutValidation("User-Agent", UserAgent);
-                else if (Request.Headers.Any(x => x.Key == "User-Agent" && x.Value != null) == false)
-                    Request.Headers.TryAddWithoutValidation("User-Agent", _DefaultUserAgent);
-            }
-            else
-            {
-                if (UserAgent.IsNullOrEmpty() == false)
-                    Request.Content.Headers.TryAddWithoutValidation("User-Agent", UserAgent);
-                else if (Request.Content.Headers.Any(x => x.Key == "User-Agent" && x.Value != null) == false)
-                    Request.Content.Headers.TryAddWithoutValidation("User-Agent", _DefaultUserAgent);
-            }
-
             // 主动添加的请求头
             if (Headers.HasValue())
-            {
-                Headers.Where(x => ContentTypeKey.Contains(x.Key.ToLower())).ForEach(x =>
-                {
-                    if (Request.Content == null)
-                        Request.Headers.TryAddWithoutValidation(x.Key, x.Value);
-                    else
-                        Request.Content.Headers.TryAddWithoutValidation(x.Key, x.Value);
-                });
-            }
+                Headers.Where(x => ContentTypeKey.Contains(x.Key.ToLower())).ForEach(x => Request.Headers.TryAddWithoutValidation(x.Key, x.Value));
+
+            Request.Headers.TryAddWithoutValidation("Cache-Control", "no-cache");
+            Request.Headers.TryAddWithoutValidation("Accept", "application/json");
+            Request.Headers.TryAddWithoutValidation("User-Agent", "HttpClient");
 
             // ContentType
             if (Request.Content != null && Request.Method != HttpMethod.Get)
@@ -568,8 +516,16 @@ namespace Lycoris.Common.Http
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
                 res = HttpUtility.UrlDecode(bytes, ResponseEncoding);
             }
-            //移除制表符
-            return res.ToJsonString();
+
+            try
+            {
+                //移除制表符
+                return res.ToJsonString();
+            }
+            catch
+            {
+                return res;
+            }
         }
 
         /// <summary>

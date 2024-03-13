@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net7.0;.net8.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -11,7 +11,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/lycoris-xmin/Common.Extensions</RepositoryUrl>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <Version>6.1.4</Version>
+    <Version>8.0.0-rc</Version>
     <Description>常用扩展功能及部分工具类</Description>
   </PropertyGroup>
 

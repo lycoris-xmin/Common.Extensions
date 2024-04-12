@@ -88,6 +88,21 @@ namespace Lycoris.Common.Http
         public Encoding ResponseEncoding { get; private set; } = Encoding.UTF8;
 
         /// <summary>
+        /// 请求拦截器
+        /// </summary>
+        public Action<HttpRequestMessage>? RequestInterceptor { get; set; }
+
+        /// <summary>
+        /// 响应拦截器
+        /// </summary>
+        public Action<HttpRequestMessage, HttpResponseMessage?>? ResponseInterceptor { get; set; }
+
+        /// <summary>
+        /// 请求失败判断过滤器
+        /// </summary>
+        public Func<HttpResponseMessage, bool> RequestFailedFilter { get; set; } = (resp) => resp.StatusCode != HttpStatusCode.OK;
+
+        /// <summary>
         /// ctor
         /// </summary>
         public HttpUtils() => RequestReset();
@@ -144,7 +159,7 @@ namespace Lycoris.Common.Http
         /// <returns></returns>
         public HttpUtils SetRequestTimeout(int timeout)
         {
-            Option.Timeout = timeout;
+            this.Option.Timeout = timeout;
             return this;
         }
 
@@ -156,11 +171,11 @@ namespace Lycoris.Common.Http
         /// <returns></returns>
         public HttpUtils AddRequestHeader(string key, string value)
         {
-            if (ContentTypeKey.Contains(key.ToLower()))
-                ContentType = value;
+            if (this.ContentTypeKey.Contains(key.ToLower()))
+                this.ContentType = value;
 
-            Headers ??= new Dictionary<string, string>();
-            Headers.Add(key, value);
+            this.Headers ??= new Dictionary<string, string>();
+            this.Headers.Add(key, value);
             return this;
         }
 
@@ -172,8 +187,8 @@ namespace Lycoris.Common.Http
         /// <returns></returns>
         public HttpUtils AddQueryParams(string key, string value)
         {
-            QueryParams ??= new Dictionary<string, string>();
-            QueryParams.Add(key, value);
+            this.QueryParams ??= new Dictionary<string, string>();
+            this.QueryParams.Add(key, value);
             return this;
         }
 
@@ -184,9 +199,9 @@ namespace Lycoris.Common.Http
         /// <returns></returns>
         public HttpUtils AddJsonBody(string body)
         {
-            JsonBody = body;
-            FormData = new Dictionary<string, string>();
-            FormFileData = new Dictionary<string, string>();
+            this.JsonBody = body;
+            this.FormData = new Dictionary<string, string>();
+            this.FormFileData = new Dictionary<string, string>();
             return this;
         }
 
@@ -197,9 +212,9 @@ namespace Lycoris.Common.Http
         /// <returns></returns>
         public HttpUtils AddJsonBody<T>(T body) where T : class
         {
-            JsonBody = body.ToJson();
-            FormData = new Dictionary<string, string>();
-            FormFileData = new Dictionary<string, string>();
+            this.JsonBody = body.ToJson();
+            this.FormData = new Dictionary<string, string>();
+            this.FormFileData = new Dictionary<string, string>();
             return this;
         }
 
@@ -211,9 +226,9 @@ namespace Lycoris.Common.Http
         /// <returns></returns>
         public HttpUtils AddFormData(string key, string value)
         {
-            FormData ??= new Dictionary<string, string>();
-            FormData.Add(key, value);
-            JsonBody = string.Empty;
+            this.FormData ??= new Dictionary<string, string>();
+            this.FormData.Add(key, value);
+            this.JsonBody = string.Empty;
             return this;
         }
 
@@ -225,9 +240,9 @@ namespace Lycoris.Common.Http
         /// <returns></returns>
         public HttpUtils AddFormFileData(string fileName, string filePath)
         {
-            FormFileData ??= new Dictionary<string, string>();
-            FormFileData.Add(fileName, filePath);
-            JsonBody = string.Empty;
+            this.FormFileData ??= new Dictionary<string, string>();
+            this.FormFileData.Add(fileName, filePath);
+            this.JsonBody = string.Empty;
             return this;
         }
 
@@ -238,7 +253,7 @@ namespace Lycoris.Common.Http
         /// <returns></returns>
         public HttpUtils AddHttpRequestMessage(Action<HttpRequestMessage> configure)
         {
-            configure.Invoke(Request);
+            configure.Invoke(this.Request);
             return this;
         }
 
@@ -249,7 +264,7 @@ namespace Lycoris.Common.Http
         /// <returns></returns>
         public HttpUtils RequestOptionBuilder(Action<RequestOption> configure)
         {
-            configure.Invoke(Option);
+            configure.Invoke(this.Option);
             return this;
         }
 
@@ -260,7 +275,7 @@ namespace Lycoris.Common.Http
         /// <returns></returns>
         public HttpUtils SetRequestEncoding(string encoding)
         {
-            RequestEncoding = Encoding.GetEncoding(encoding);
+            this.RequestEncoding = Encoding.GetEncoding(encoding);
             return this;
         }
 
@@ -271,7 +286,7 @@ namespace Lycoris.Common.Http
         /// <returns></returns>
         public HttpUtils SetRequestEncoding(Encoding encoding)
         {
-            RequestEncoding = encoding;
+            this.RequestEncoding = encoding;
             return this;
         }
 
@@ -282,7 +297,7 @@ namespace Lycoris.Common.Http
         /// <returns></returns>
         public HttpUtils SetResponseEncoding(string encoding)
         {
-            ResponseEncoding = Encoding.GetEncoding(encoding);
+            this.ResponseEncoding = Encoding.GetEncoding(encoding);
             return this;
         }
 
@@ -293,7 +308,7 @@ namespace Lycoris.Common.Http
         /// <returns></returns>
         public HttpUtils SetResponseEncoding(Encoding encoding)
         {
-            ResponseEncoding = encoding;
+            this.ResponseEncoding = encoding;
             return this;
         }
 
@@ -307,7 +322,7 @@ namespace Lycoris.Common.Http
 
             try
             {
-                Request.Method = HttpMethod.Get;
+                this.Request.Method = HttpMethod.Get;
 
                 var res = await GetResponseAsync(Option, Request);
 
@@ -339,7 +354,7 @@ namespace Lycoris.Common.Http
 
             try
             {
-                Request.Method = HttpMethod.Post;
+                this.Request.Method = HttpMethod.Post;
 
                 var res = await GetResponseAsync(Option, Request);
 
@@ -372,7 +387,7 @@ namespace Lycoris.Common.Http
 
             try
             {
-                Request.Method = HttpMethod.Put;
+                this.Request.Method = HttpMethod.Put;
 
                 var res = await GetResponseAsync(Option, Request);
 
@@ -405,7 +420,7 @@ namespace Lycoris.Common.Http
 
             try
             {
-                Request.Method = HttpMethod.Delete;
+                this.Request.Method = HttpMethod.Delete;
 
                 var res = await GetResponseAsync(Option, Request);
 
@@ -429,13 +444,14 @@ namespace Lycoris.Common.Http
         }
 
         /// <summary>
-        /// 
+        /// 统一请求封装
         /// </summary>
         /// <param name="options"></param>
         /// <param name="request"></param>
         /// <returns></returns>
         private async Task<HttpResponseMessage> GetResponseAsync(RequestOption options, HttpRequestMessage request)
         {
+            HttpResponseMessage? result = null;
             var builder = new HttpUtilsBuilder();
 
             try
@@ -446,9 +462,18 @@ namespace Lycoris.Common.Http
                 //添加默认请求头
                 AddDefaultHeader();
 
-                return await builder.Create(options).SendAsync(request);
+                var client = builder.Create(options);
+
+
+                this.RequestInterceptor?.Invoke(request);
+
+                result = await client.SendAsync(request);
+
+                this.ResponseInterceptor?.Invoke(request, result);
+
+                return result;
             }
-            catch (Exception)
+            catch 
             {
                 throw;
             }
@@ -460,22 +485,22 @@ namespace Lycoris.Common.Http
 
         private void MapHttpRequestMessage()
         {
-            if (QueryParams.Count > 0)
+            if (this.QueryParams.Count > 0)
             {
-                Url += "?";
-                Url += QueryParams.ToAsciiSortParams();
+                this.Url += "?";
+                this.Url += this.QueryParams.ToAsciiSortParams();
             }
 
-            Request.RequestUri = new Uri(Url);
+            this.Request.RequestUri = new Uri(this.Url);
 
-            if (JsonBody.IsNullOrEmpty() == false)
-                Request.Content = new StringContent(JsonBody, RequestEncoding);
-            else if (FormData != null && FormData.Any() || FormFileData != null && FormFileData.Any())
+            if (this.JsonBody.IsNullOrEmpty() == false)
+                this.Request.Content = new StringContent(this.JsonBody, this.RequestEncoding);
+            else if (FormData != null && this.FormData.Any() || this.FormFileData != null && this.FormFileData.Any())
             {
                 var formContent = new MultipartFormDataContent();
-                FormData!.ForEach(x => formContent.Add(new StringContent(x.Value, RequestEncoding), x.Key));
-                FormFileData.ForEach(x => formContent.Add(new ByteArrayContent(File.ReadAllBytes(x.Value)), "file", x.Key));
-                Request.Content = formContent;
+                this.FormData!.ForEach(x => formContent.Add(new StringContent(x.Value, RequestEncoding), x.Key));
+                this.FormFileData.ForEach(x => formContent.Add(new ByteArrayContent(File.ReadAllBytes(x.Value)), "file", x.Key));
+                this.Request.Content = formContent;
             }
         }
 
@@ -485,16 +510,18 @@ namespace Lycoris.Common.Http
         private void AddDefaultHeader()
         {
             // 主动添加的请求头
-            if (Headers.HasValue())
-                Headers.Where(x => ContentTypeKey.Contains(x.Key.ToLower())).ForEach(x => Request.Headers.TryAddWithoutValidation(x.Key, x.Value));
+            if (this.Headers.HasValue())
+                this.Headers.Where(x => this.ContentTypeKey.Contains(x.Key.ToLower())).ForEach(x => this.Request.Headers.TryAddWithoutValidation(x.Key, x.Value));
 
-            Request.Headers.TryAddWithoutValidation("Cache-Control", "no-cache");
-            Request.Headers.TryAddWithoutValidation("Accept", "application/json");
-            Request.Headers.TryAddWithoutValidation("User-Agent", "HttpClient");
+            this.Request.Headers.TryAddWithoutValidation("Cache-Control", "no-cache");
+
+            this.Request.Headers.TryAddWithoutValidation("Accept", "application/json");
+
+            this.Request.Headers.TryAddWithoutValidation("User-Agent", _DefaultUserAgent);
 
             // ContentType
-            if (Request.Content != null && Request.Method != HttpMethod.Get)
-                Request.Content.Headers.ContentType = new MediaTypeHeaderValue(MediaType.IsNullOrEmpty() ? "" : "application/json") { CharSet = CharSet };
+            if (this.Request.Content != null && this.Request.Method != HttpMethod.Get)
+                this.Request.Content.Headers.ContentType = new MediaTypeHeaderValue(this.MediaType.IsNullOrEmpty() ? "" : "application/json") { CharSet = CharSet };
         }
 
         /// <summary>
@@ -508,13 +535,13 @@ namespace Lycoris.Common.Http
                 return null;
 
             string res;
-            if (ResponseEncoding == null || ResponseEncoding == Encoding.UTF8)
+            if (this.ResponseEncoding == null || this.ResponseEncoding == Encoding.UTF8)
                 res = await content.ReadAsStringAsync();
             else
             {
                 var bytes = await content.ReadAsByteArrayAsync();
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-                res = HttpUtility.UrlDecode(bytes, ResponseEncoding);
+                res = HttpUtility.UrlDecode(bytes, this.ResponseEncoding);
             }
 
             try
@@ -533,14 +560,14 @@ namespace Lycoris.Common.Http
         /// </summary>
         private void RequestReset()
         {
-            Url = string.Empty;
-            Headers = new Dictionary<string, string>();
-            QueryParams = new Dictionary<string, string>();
-            JsonBody = string.Empty;
-            FormData = new Dictionary<string, string>();
-            FormFileData = new Dictionary<string, string>();
-            Request = new HttpRequestMessage();
-            Option = new RequestOption();
+            this.Url = string.Empty;
+            this.Headers = new Dictionary<string, string>();
+            this.QueryParams = new Dictionary<string, string>();
+            this.JsonBody = string.Empty;
+            this.FormData = new Dictionary<string, string>();
+            this.FormFileData = new Dictionary<string, string>();
+            this.Request = new HttpRequestMessage();
+            this.Option = new RequestOption();
         }
     }
 

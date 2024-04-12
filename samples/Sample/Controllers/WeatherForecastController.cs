@@ -1,6 +1,4 @@
-using Lycoris.Common.Extensions;
 using Lycoris.Common.Helper;
-using Lycoris.Common.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Sample.Controllers

@@ -24,7 +24,7 @@ namespace Sample.Controllers
         {
             var path = $"{AppContext.BaseDirectory}/About/set";
 
-            FileHelper.CreateDirectory(path);
+            FileHelper.EnsurePathExists(path);
 
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {

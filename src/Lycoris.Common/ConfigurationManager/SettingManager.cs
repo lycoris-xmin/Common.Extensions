@@ -43,7 +43,7 @@ namespace Lycoris.Common.ConfigurationManager
 
             var value = Configuration.GetValue(key, defaultValue);
 
-            return !value.IsNullOrEmpty() ? value.Trim() : defaultValue.Trim();
+            return !value.IsNullOrEmpty() ? value!.Trim() : defaultValue.Trim();
         }
 
         /// <summary>

@@ -316,9 +316,9 @@ namespace Lycoris.Common.Http
         /// HttpGet请求
         /// </summary>
         /// <returns></returns>
-        public async Task<HttpResponse> HttpGetAsync()
+        public async Task<HttpResponse<string>> HttpGetAsync()
         {
-            var result = new HttpResponse();
+            var result = new HttpResponse<string>();
 
             try
             {
@@ -348,9 +348,9 @@ namespace Lycoris.Common.Http
         /// HttpPost请求
         /// </summary>
         /// <returns></returns>
-        public async Task<HttpResponse> HttpPostAsync()
+        public async Task<HttpResponse<string>> HttpPostAsync()
         {
-            var result = new HttpResponse();
+            var result = new HttpResponse<string>();
 
             try
             {
@@ -381,9 +381,9 @@ namespace Lycoris.Common.Http
         /// HttpPut请求
         /// </summary>
         /// <returns></returns>
-        public async Task<HttpResponse> HttpPutAsync()
+        public async Task<HttpResponse<string>> HttpPutAsync()
         {
-            var result = new HttpResponse();
+            var result = new HttpResponse<string>();
 
             try
             {
@@ -414,9 +414,9 @@ namespace Lycoris.Common.Http
         /// HttpDelete请求
         /// </summary>
         /// <returns></returns>
-        public async Task<HttpResponse> HttpDeleteAsync()
+        public async Task<HttpResponse<string>> HttpDeleteAsync()
         {
-            var result = new HttpResponse();
+            var result = new HttpResponse<string>();
 
             try
             {
@@ -433,6 +433,48 @@ namespace Lycoris.Common.Http
                 result.HttpStatusCode = res.StatusCode;
                 result.Success = (int)result.HttpStatusCode < 300;
                 result.Content = await GetResponseBodyAsync(res.Content);
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Exception = ex;
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 下载文件
+        /// </summary>
+        /// <returns></returns>
+        public Task<HttpResponse<byte[]>> DownloadAsync() => DownloadAsync(HttpMethod.Get);
+
+        /// <summary>
+        /// 下载文件
+        /// </summary>
+        /// <param name="httpMethod"></param>
+        /// <returns></returns>
+        public async Task<HttpResponse<byte[]>> DownloadAsync(HttpMethod httpMethod)
+        {
+            var result = new HttpResponse<byte[]>();
+
+            try
+            {
+                this.Request.Method = httpMethod;
+
+                var res = await GetResponseAsync(Option, Request);
+
+                res.EnsureSuccessStatusCode();
+
+                if (res == null)
+                {
+                    result.Success = false;
+                    return result;
+                }
+
+                result.HttpStatusCode = res.StatusCode;
+                result.Success = (int)result.HttpStatusCode < 300;
+                result.Content = await res.Content.ReadAsByteArrayAsync();
             }
             catch (Exception ex)
             {
@@ -473,7 +515,7 @@ namespace Lycoris.Common.Http
 
                 return result;
             }
-            catch 
+            catch
             {
                 throw;
             }
@@ -574,7 +616,7 @@ namespace Lycoris.Common.Http
     /// <summary>
     /// 
     /// </summary>
-    public class HttpResponse
+    public class HttpResponse<T>
     {
         /// <summary>
         /// 
@@ -602,7 +644,7 @@ namespace Lycoris.Common.Http
         /// <summary>
         /// 
         /// </summary>
-        public string? Content { get; set; }
+        public T? Content { get; set; }
 
         /// <summary>
         /// 

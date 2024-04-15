@@ -118,6 +118,45 @@
         }
 
         /// <summary>
+        /// 删除文件及文件夹
+        /// </summary>
+        /// <param name="targetDir"></param>
+        /// <param name="deleteRoot">是否删除根目录文件夹</param>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        public static void DeleteDirectoryAndContents(string targetDir, bool deleteRoot = false)
+        {
+            // 检查目录是否存在  
+            if (Directory.Exists(targetDir))
+            {
+                // 获取目录中所有文件和子目录  
+                string[] files = Directory.GetFiles(targetDir);
+                string[] dirs = Directory.GetDirectories(targetDir);
+
+                // 删除所有文件  
+                foreach (string file in files)
+                {
+                    File.Delete(file);
+                }
+
+                // 递归删除所有子目录  
+                foreach (string dir in dirs)
+                {
+                    DeleteDirectoryAndContents(dir, true); // 递归调用时，通常也删除子目录  
+                }
+
+                // 根据参数决定是否删除当前目录  
+                if (deleteRoot)
+                {
+                    Directory.Delete(targetDir);
+                }
+            }
+            else
+            {
+                throw new DirectoryNotFoundException($"目录 {targetDir} 不存在。");
+            }
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="sourceDirName"></param>

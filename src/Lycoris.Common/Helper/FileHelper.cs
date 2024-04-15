@@ -16,10 +16,6 @@
             if (string.IsNullOrWhiteSpace(path))
                 throw new ArgumentException("the path cannot be null or whitespace.", nameof(path));
 
-            // 如果路径以目录分隔符结尾，则移除它，因为我们只想要目录路径  
-            if (Path.HasExtension(path))
-                throw new ArgumentException("the path should be a directory path, not a file path.", nameof(path));
-
             // 标准化路径，移除末尾的目录分隔符（如果有的话）  
             path = Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar);
 

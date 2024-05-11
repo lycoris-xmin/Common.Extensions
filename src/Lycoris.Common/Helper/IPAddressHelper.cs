@@ -1,6 +1,7 @@
 ﻿using Lycoris.Common.Extensions;
 using Lycoris.Common.Properties;
 using System.Net;
+using System.Security.Authentication;
 using System.Text;
 
 namespace Lycoris.Common.Helper
@@ -290,6 +291,116 @@ namespace Lycoris.Common.Helper
             {
                 return "未知";
             }
+        }
+
+        /// <summary>
+        /// 获取本机公网IP
+        /// </summary>
+        /// <returns></returns>
+        public static async Task<string?> GetLocalPublicIpAddressAsync()
+        {
+            var ipaddress = await GetPublicIpAddressByIPIfyAsync();
+
+            if (ipaddress.IsNullOrEmpty())
+                ipaddress = await GetPublicIpAddressByICanHazipAsync();
+
+            if (ipaddress.IsNullOrEmpty())
+                ipaddress = await GetPublicIpAddressByIfConfigAsync();
+
+
+            if (ipaddress.IsNullOrEmpty())
+                ipaddress = await GetPublicIpAddressByIfConfig2Async();
+
+            if (ipaddress.IsNullOrEmpty())
+                ipaddress = await GetPublicIpAddressByIPInfoAsync();
+
+            if (ipaddress.IsNullOrEmpty())
+                ipaddress = await GetPublicIpAddressByIPApiAsync();
+
+            return ipaddress;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        private static async Task<string> GetPublicIpAddressByIPIfyAsync()
+        {
+            var content = await RequestAsync("https://api.ipify.org?format=json");
+
+            // 解析返回的JSON字符串以获取IP地址  
+            dynamic ipInfo = Newtonsoft.Json.JsonConvert.DeserializeObject(content!)!;
+
+            var _ipaddress = "";
+
+            if (ipInfo != null)
+                _ipaddress = ipInfo.ip;
+
+            return _ipaddress ?? "";
+        }
+
+        private static async Task<string> GetPublicIpAddressByICanHazipAsync()
+        {
+            var content = await RequestAsync("http://icanhazip.com/");
+            return content ?? "";
+        }
+
+        private static async Task<string> GetPublicIpAddressByIfConfigAsync()
+        {
+            var content = await RequestAsync("http://ifconfig.me/ip");
+            return content ?? "";
+        }
+
+        private static async Task<string> GetPublicIpAddressByIfConfig2Async()
+        {
+            var content = await RequestAsync("http://ifconfig.co/ip");
+            return content ?? "";
+        }
+
+        private static async Task<string> GetPublicIpAddressByIPInfoAsync()
+        {
+            var content = await RequestAsync("https://ipinfo.io/ip");
+            return content ?? "";
+        }
+
+        private static async Task<string> GetPublicIpAddressByIPApiAsync()
+        {
+            var content = await RequestAsync("http://ip-api.com/json");
+
+            var jobj = content.ToJObject();
+
+            if (!jobj.ContainsKey("status") || jobj["status"]!.ToString() != "success")
+                return "";
+
+            if (!jobj.ContainsKey("query"))
+                return "";
+
+            return jobj["query"]!.ToString();
+        }
+
+        private static async Task<string> RequestAsync(string url)
+        {
+            var content = "";
+            try
+            {
+                var handler = new HttpClientHandler();
+                handler.SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13; // 尝试TLS 1.2或TLS 1.3 
+                handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; };
+
+                using (var httpClient = new HttpClient(handler))
+                {
+                    // 这里我们使用一个常见的免费服务来获取公网IP，但请注意这可能会有请求限制或变化  
+                    var response = await httpClient.GetAsync(url);
+                    response.EnsureSuccessStatusCode();
+                    content = await response.Content.ReadAsStringAsync();
+                }
+            }
+            catch
+            {
+        
+            }
+
+            return content ?? "";
         }
 
         /// <summary>

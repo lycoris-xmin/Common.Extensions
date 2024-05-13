@@ -317,7 +317,7 @@ namespace Lycoris.Common.Helper
             if (ipaddress.IsNullOrEmpty())
                 ipaddress = await GetPublicIpAddressByIPApiAsync();
 
-            return ipaddress;
+            return ipaddress.Replace("\n", "").Trim();
         }
 
         /// <summary>
@@ -397,7 +397,7 @@ namespace Lycoris.Common.Helper
             }
             catch
             {
-        
+
             }
 
             return content ?? "";

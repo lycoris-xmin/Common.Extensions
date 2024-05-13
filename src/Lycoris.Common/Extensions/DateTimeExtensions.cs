@@ -47,7 +47,7 @@ namespace Lycoris.Common.Extensions
         /// </summary>
         /// <param name="time"></param>
         /// <returns></returns>
-        public static string ToTimeSpanChinese(this DateTime time) => time.ToString("yyyy年MM月dd日 HH时mm分ss秒");
+        public static string ToChinese(this DateTime time) => time.ToString("yyyy年MM月dd日 HH时mm分ss秒");
 
         /// <summary>
         /// 时间戳比较

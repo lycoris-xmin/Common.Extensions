@@ -120,10 +120,10 @@ namespace Lycoris.Common.Extensions
         /// <summary>
         /// 捕获指定异常
         /// </summary>
+        /// <typeparam name="TException"></typeparam>
         /// <param name="action"></param>
         /// <param name="handler"></param>
-        /// <returns></returns>
-        public static void HandleException(this Action action, Action<Exception>? handler = null)
+        public static void HandleException<TException>(this Action action, Action<TException>? handler = null) where TException : Exception
         {
             try
             {
@@ -131,17 +131,19 @@ namespace Lycoris.Common.Extensions
             }
             catch (Exception ex)
             {
-                handler?.Invoke(ex);
+                if (ex is TException exception)
+                    handler?.Invoke(exception);
             }
         }
 
         /// <summary>
         /// 捕获指定异常
         /// </summary>
+        /// <typeparam name="TException"></typeparam>
         /// <param name="task"></param>
         /// <param name="handler"></param>
         /// <returns></returns>
-        public static async Task HandleExceptionAsync(this Task task, Action<Exception>? handler = null)
+        public static async Task HandleExceptionAsync<TException>(this Task task, Action<TException>? handler = null) where TException : Exception
         {
             try
             {
@@ -149,17 +151,19 @@ namespace Lycoris.Common.Extensions
             }
             catch (Exception ex)
             {
-                handler?.Invoke(ex);
+                if (ex is TException exception)
+                    handler?.Invoke(exception);
             }
         }
 
         /// <summary>
         /// 捕获指定异常
         /// </summary>
+        /// <typeparam name="TException"></typeparam>
         /// <param name="task"></param>
         /// <param name="handler"></param>
         /// <returns></returns>
-        public static async Task HandleExceptionAsync(this Task task, Func<Exception, Task>? handler = null)
+        public static async Task HandleExceptionAsync<TException>(this Task task, Func<TException, Task>? handler = null) where TException : Exception
         {
             try
             {
@@ -167,8 +171,8 @@ namespace Lycoris.Common.Extensions
             }
             catch (Exception ex)
             {
-                if (handler != null)
-                    await handler(ex);
+                if (ex is TException exception && handler != null)
+                    await handler.Invoke(exception);
             }
         }
 
@@ -176,10 +180,11 @@ namespace Lycoris.Common.Extensions
         /// 捕获指定异常
         /// </summary>
         /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TException"></typeparam>
         /// <param name="task"></param>
         /// <param name="handler"></param>
         /// <returns></returns>
-        public static async Task<T?> HandleExceptionAsync<T>(this Task<T?> task, Action<Exception>? handler = null)
+        public static async Task<T?> HandleExceptionAsync<T, TException>(this Task<T?> task, Action<TException>? handler = null) where TException : Exception
         {
             try
             {
@@ -187,7 +192,8 @@ namespace Lycoris.Common.Extensions
             }
             catch (Exception ex)
             {
-                handler?.Invoke(ex);
+                if (ex is TException exception)
+                    handler?.Invoke(exception);
 
                 return default;
             }
@@ -197,10 +203,11 @@ namespace Lycoris.Common.Extensions
         /// 捕获指定异常
         /// </summary>
         /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TException"></typeparam>
         /// <param name="task"></param>
         /// <param name="handler"></param>
         /// <returns></returns>
-        public static async Task<T?> HandleExceptionAsync<T>(this Task<T?> task, Func<Exception, Task<T?>>? handler = null)
+        public static async Task<T?> HandleExceptionAsync<T, TException>(this Task<T?> task, Func<TException, Task<T?>>? handler = null) where TException : Exception
         {
             try
             {
@@ -208,8 +215,8 @@ namespace Lycoris.Common.Extensions
             }
             catch (Exception ex)
             {
-                if (handler != null)
-                    return await handler(ex);
+                if (ex is TException exception && handler != null)
+                    await handler.Invoke(exception);
 
                 return default;
             }
@@ -229,7 +236,7 @@ namespace Lycoris.Common.Extensions
             }
             catch (Exception ex)
             {
-                handler(ex);
+                handler.Invoke(ex);
             }
         }
 
@@ -247,7 +254,7 @@ namespace Lycoris.Common.Extensions
             }
             catch (Exception ex)
             {
-                return handler(ex);
+                return handler.Invoke(ex);
             }
         }
 
@@ -255,9 +262,9 @@ namespace Lycoris.Common.Extensions
         /// 捕获所有异常
         /// </summary>
         /// <param name="task"></param>
-        /// <param name="action"></param>
+        /// <param name="handler"></param>
         /// <returns></returns>
-        public static async Task CatchAsync(this Task task, Action<Exception> action)
+        public static async Task CatchAsync(this Task task, Action<Exception> handler)
         {
             try
             {
@@ -265,7 +272,7 @@ namespace Lycoris.Common.Extensions
             }
             catch (Exception ex)
             {
-                action(ex);
+                handler.Invoke(ex);
             }
         }
 
@@ -273,9 +280,9 @@ namespace Lycoris.Common.Extensions
         /// 捕获所有异常
         /// </summary>
         /// <param name="task"></param>
-        /// <param name="func"></param>
+        /// <param name="handler"></param>
         /// <returns></returns>
-        public static async Task CatchAsync(this Task task, Func<Exception, Task> func)
+        public static async Task CatchAsync(this Task task, Func<Exception, Task> handler)
         {
             try
             {
@@ -283,7 +290,7 @@ namespace Lycoris.Common.Extensions
             }
             catch (Exception ex)
             {
-                await func(ex);
+                await handler.Invoke(ex);
             }
         }
 
@@ -292,9 +299,9 @@ namespace Lycoris.Common.Extensions
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="task"></param>
-        /// <param name="func"></param>
+        /// <param name="handler"></param>
         /// <returns></returns>
-        public static async Task<T?> CatchAsync<T>(this Task<T?> task, Func<Exception, T?> func)
+        public static async Task<T?> CatchAsync<T>(this Task<T?> task, Func<Exception, T?> handler)
         {
             try
             {
@@ -302,7 +309,7 @@ namespace Lycoris.Common.Extensions
             }
             catch (Exception ex)
             {
-                return func(ex);
+                return handler.Invoke(ex);
             }
         }
 
@@ -311,9 +318,9 @@ namespace Lycoris.Common.Extensions
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="task"></param>
-        /// <param name="func"></param>
+        /// <param name="handler"></param>
         /// <returns></returns>
-        public static async Task<T?> CatchAsync<T>(this Task<T?> task, Func<Exception, Task<T?>> func)
+        public static async Task<T?> CatchAsync<T>(this Task<T?> task, Func<Exception, Task<T?>> handler)
         {
             try
             {
@@ -321,7 +328,75 @@ namespace Lycoris.Common.Extensions
             }
             catch (Exception ex)
             {
-                return await func(ex);
+                return await handler.Invoke(ex);
+            }
+        }
+
+        /// <summary>
+        /// 执行一个可能超时的异步操作
+        /// </summary>
+        /// <param name="taskFactory">一个返回Task的委托</param>  
+        /// <param name="timeout">超时时间（毫秒）</param>  
+        /// <returns></returns>
+        public static async Task ExecuteWithTimeoutAsync(this Func<Task> taskFactory, int timeout)
+        {
+            using (var cts = new CancellationTokenSource(timeout))
+            {
+                try
+                {
+                    // 尝试在指定的超时时间内执行操作  
+                    await taskFactory.Invoke().ConfigureAwait(false);
+                }
+                catch (OperationCanceledException ex) when (ex.CancellationToken == cts.Token)
+                {
+                    // 操作被取消（即超时）  
+                    // 这里可以根据需要处理超时情况  
+                }
+                catch (Exception)
+                {
+                    // 处理其他异常  
+                    throw; // 或者根据需要记录日志  
+                }
+            }
+        }
+
+        /// <summary>
+        /// 执行一个可能超时的异步操作
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="taskFactory">一个返回Task的委托</param>  
+        /// <param name="timeout">超时时间（毫秒）</param>  
+        /// <returns></returns>
+        public static Task<T?> ExecuteWithTimeoutAsync<T>(this Func<Task<T>> taskFactory, int timeout) => ExecuteWithTimeoutAsync(taskFactory, timeout, default);
+
+        /// <summary>
+        /// 执行一个可能超时的异步操作
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="taskFactory">一个返回Task的委托</param>  
+        /// <param name="timeout">超时时间（毫秒）</param>  
+        /// <param name="defauleValue">默认值</param>
+        /// <returns></returns>
+        public static async Task<T?> ExecuteWithTimeoutAsync<T>(this Func<Task<T>> taskFactory, int timeout, T? defauleValue)
+        {
+            using (var cts = new CancellationTokenSource(timeout))
+            {
+                try
+                {
+                    // 尝试在指定的超时时间内执行操作  
+                    return await taskFactory.Invoke().ConfigureAwait(false);
+                }
+                catch (OperationCanceledException ex) when (ex.CancellationToken == cts.Token)
+                {
+                    // 操作被取消（即超时）  
+                    // 这里可以根据需要处理超时情况
+                    return defauleValue;
+                }
+                catch (Exception)
+                {
+                    // 处理其他异常  
+                    throw; // 或者根据需要记录日志  
+                }
             }
         }
     }

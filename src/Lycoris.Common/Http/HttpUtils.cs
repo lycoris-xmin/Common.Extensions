@@ -506,7 +506,6 @@ namespace Lycoris.Common.Http
 
                 var client = builder.Create(options);
 
-
                 this.RequestInterceptor?.Invoke(request);
 
                 result = await client.SendAsync(request);
@@ -553,7 +552,7 @@ namespace Lycoris.Common.Http
         {
             // 主动添加的请求头
             if (this.Headers.HasValue())
-                this.Headers.Where(x => this.ContentTypeKey.Contains(x.Key.ToLower())).ForEach(x => this.Request.Headers.TryAddWithoutValidation(x.Key, x.Value));
+                this.Headers.Where(x => !this.ContentTypeKey.Contains(x.Key.ToLower())).ForEach(x => this.Request.Headers.TryAddWithoutValidation(x.Key, x.Value));
 
             this.Request.Headers.TryAddWithoutValidation("Cache-Control", "no-cache");
 
@@ -563,7 +562,21 @@ namespace Lycoris.Common.Http
 
             // ContentType
             if (this.Request.Content != null && this.Request.Method != HttpMethod.Get)
+            {
                 this.Request.Content.Headers.ContentType = new MediaTypeHeaderValue(this.MediaType.IsNullOrEmpty() ? "" : "application/json") { CharSet = CharSet };
+            }
+
+            var contentType = this.Headers.Where(x => this.ContentTypeKey.Contains(x.Key.ToLower())).SingleOrDefault();
+
+            if (contentType.Value.IsNullOrEmpty())
+            {
+                if (this.Request.Method == HttpMethod.Post)
+                    this.Request.Headers.TryAddWithoutValidation("ContentType", $"application/json; {CharSet}");
+            }
+            else
+            {
+                this.Request.Headers.TryAddWithoutValidation("ContentType", contentType.Value);
+            }
         }
 
         /// <summary>

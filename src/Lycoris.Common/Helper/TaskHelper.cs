@@ -66,7 +66,7 @@
         /// <returns></returns>
         public static async Task WaitIfAsync(Func<bool> condition, int second, TimeSpan? ttl = null)
         {
-            var expiredTime = ttl.HasValue ? DateTime.Now.AddSeconds(ttl!.Value.TotalSeconds) : DateTime.Now.AddYears(1);
+            var expiredTime = ttl.HasValue ? DateTime.Now.AddSeconds(ttl!.Value.TotalSeconds) : DateTime.Now.AddYears(100);
 
             do
             {
@@ -128,7 +128,7 @@
         /// <returns></returns>
         public static async Task WaitForAsync(Func<bool> condition, int second, Action method, TimeSpan? ttl = null)
         {
-            var expiredTime = ttl.HasValue ? DateTime.Now.AddSeconds(ttl!.Value.TotalSeconds) : DateTime.Now.AddYears(1);
+            var expiredTime = ttl.HasValue ? DateTime.Now.AddSeconds(ttl!.Value.TotalSeconds) : DateTime.Now.AddYears(100);
 
             do
             {
@@ -161,7 +161,7 @@
         /// <returns></returns>
         public static async Task WaitForAsync(Func<bool> condition, int second, Func<WaitStatusEnum> method, TimeSpan? ttl = null)
         {
-            var expiredTime = ttl.HasValue ? DateTime.Now.AddSeconds(ttl!.Value.TotalSeconds) : DateTime.Now.AddYears(1);
+            var expiredTime = ttl.HasValue ? DateTime.Now.AddSeconds(ttl!.Value.TotalSeconds) : DateTime.Now.AddYears(100);
 
             do
             {
@@ -196,7 +196,7 @@
         /// <returns></returns>
         public static async Task WaitForAsync(Func<bool> condition, int second, Func<Task> method, TimeSpan? ttl = null)
         {
-            var expiredTime = ttl.HasValue ? DateTime.Now.AddSeconds(ttl!.Value.TotalSeconds) : DateTime.Now.AddYears(1);
+            var expiredTime = ttl.HasValue ? DateTime.Now.AddSeconds(ttl!.Value.TotalSeconds) : DateTime.Now.AddYears(100);
 
             do
             {
@@ -229,7 +229,7 @@
         /// <returns></returns>
         public static async Task WaitForAsync(Func<bool> condition, int second, Func<Task<WaitStatusEnum>> method, TimeSpan? ttl = null)
         {
-            var expiredTime = ttl.HasValue ? DateTime.Now.AddSeconds(ttl!.Value.TotalSeconds) : DateTime.Now.AddYears(1);
+            var expiredTime = ttl.HasValue ? DateTime.Now.AddSeconds(ttl!.Value.TotalSeconds) : DateTime.Now.AddYears(100);
 
             do
             {
@@ -238,6 +238,146 @@
                     break;
 
                 if (expiredTime <= DateTime.Now)
+                    break;
+
+                await Task.Delay(second * 1000);
+            } while (condition());
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <param name="second"></param>
+        /// <param name="method"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public static Task WaitForAsync(bool condition, int second, Action method, int? count = null) => WaitForAsync(() => condition, second, method, count);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <param name="second"></param>
+        /// <param name="method"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public static async Task WaitForAsync(Func<bool> condition, int second, Action method, int? count = null)
+        {
+            var current = 0;
+            count ??= int.MaxValue;
+
+            do
+            {
+                if (current++ > count)
+                    break;
+
+                method.Invoke();
+
+                await Task.Delay(second * 1000);
+            } while (condition());
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <param name="second"></param>
+        /// <param name="method"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public static Task WaitForAsync(bool condition, int second, Func<WaitStatusEnum> method, int? count = null) => WaitForAsync(() => condition, second, method, count);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <param name="second"></param>
+        /// <param name="method"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public static async Task WaitForAsync(Func<bool> condition, int second, Func<WaitStatusEnum> method, int? count = null)
+        {
+            var current = 0;
+            count ??= int.MaxValue;
+
+            do
+            {
+                if (current++ > count)
+                    break;
+
+                var result = method.Invoke();
+                if (result == WaitStatusEnum.BREAKE)
+                    break;
+
+                await Task.Delay(second * 1000);
+            } while (condition());
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <param name="second"></param>
+        /// <param name="method"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public static Task WaitForAsync(bool condition, int second, Func<Task> method, int? count = null) => WaitForAsync(() => condition, second, method, count);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <param name="second"></param>
+        /// <param name="method"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public static async Task WaitForAsync(Func<bool> condition, int second, Func<Task> method, int? count = null)
+        {
+            var current = 0;
+            count ??= int.MaxValue;
+
+            do
+            {
+                if (current++ > count)
+                    break;
+
+                await method.Invoke();
+
+                await Task.Delay(second * 1000);
+            } while (condition());
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <param name="second"></param>
+        /// <param name="method"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public static Task WaitForAsync(bool condition, int second, Func<Task<WaitStatusEnum>> method, int? count = null) => WaitForAsync(() => condition, second, method, count);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <param name="second"></param>
+        /// <param name="method"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public static async Task WaitForAsync(Func<bool> condition, int second, Func<Task<WaitStatusEnum>> method, int? count = null)
+        {
+            var current = 0;
+            count ??= int.MaxValue;
+
+            do
+            {
+                if (current++ > count)
+                    break;
+
+                var result = await method.Invoke();
+                if (result == WaitStatusEnum.BREAKE)
                     break;
 
                 await Task.Delay(second * 1000);

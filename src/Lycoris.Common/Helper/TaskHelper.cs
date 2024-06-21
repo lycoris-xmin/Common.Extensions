@@ -55,7 +55,7 @@
         /// <param name="second"></param>
         /// <param name="ttl"></param>
         /// <returns></returns>
-        public static Task WaitIfAsync(bool condition, int second, TimeSpan? ttl = null) => WaitIfAsync(() => condition, second, ttl);
+        public static Task WaitIfAsync(bool condition, int second, TimeSpan ttl) => WaitIfAsync(() => condition, second, ttl);
 
         /// <summary>
         /// 
@@ -64,9 +64,9 @@
         /// <param name="second"></param>
         /// <param name="ttl"></param>
         /// <returns></returns>
-        public static async Task WaitIfAsync(Func<bool> condition, int second, TimeSpan? ttl = null)
+        public static async Task WaitIfAsync(Func<bool> condition, int second, TimeSpan ttl)
         {
-            var expiredTime = ttl.HasValue ? DateTime.Now.AddSeconds(ttl!.Value.TotalSeconds) : DateTime.Now.AddYears(100);
+            var expiredTime = DateTime.Now.AddSeconds(ttl.TotalSeconds);
 
             do
             {
@@ -116,7 +116,7 @@
         /// <param name="method"></param>
         /// <param name="ttl"></param>
         /// <returns></returns>
-        public static Task WaitForAsync(bool condition, int second, Action method, TimeSpan? ttl = null) => WaitForAsync(() => condition, second, method, ttl);
+        public static Task WaitForTimeSpanAsync(bool condition, int second, Action method, TimeSpan? ttl = null) => WaitForTimeSpanAsync(() => condition, second, method, ttl);
 
         /// <summary>
         /// 
@@ -126,7 +126,7 @@
         /// <param name="method"></param>
         /// <param name="ttl"></param>
         /// <returns></returns>
-        public static async Task WaitForAsync(Func<bool> condition, int second, Action method, TimeSpan? ttl = null)
+        public static async Task WaitForTimeSpanAsync(Func<bool> condition, int second, Action method, TimeSpan? ttl = null)
         {
             var expiredTime = ttl.HasValue ? DateTime.Now.AddSeconds(ttl!.Value.TotalSeconds) : DateTime.Now.AddYears(100);
 
@@ -149,7 +149,7 @@
         /// <param name="method"></param>
         /// <param name="ttl"></param>
         /// <returns></returns>
-        public static Task WaitForAsync(bool condition, int second, Func<WaitStatusEnum> method, TimeSpan? ttl = null) => WaitForAsync(() => condition, second, method, ttl);
+        public static Task WaitForTimeSpanAsync(bool condition, int second, Func<WaitStatusEnum> method, TimeSpan? ttl = null) => WaitForTimeSpanAsync(() => condition, second, method, ttl);
 
         /// <summary>
         /// 
@@ -159,7 +159,7 @@
         /// <param name="method"></param>
         /// <param name="ttl"></param>
         /// <returns></returns>
-        public static async Task WaitForAsync(Func<bool> condition, int second, Func<WaitStatusEnum> method, TimeSpan? ttl = null)
+        public static async Task WaitForTimeSpanAsync(Func<bool> condition, int second, Func<WaitStatusEnum> method, TimeSpan? ttl = null)
         {
             var expiredTime = ttl.HasValue ? DateTime.Now.AddSeconds(ttl!.Value.TotalSeconds) : DateTime.Now.AddYears(100);
 
@@ -184,7 +184,7 @@
         /// <param name="method"></param>
         /// <param name="ttl"></param>
         /// <returns></returns>
-        public static Task WaitForAsync(bool condition, int second, Func<Task> method, TimeSpan? ttl = null) => WaitForAsync(() => condition, second, method, ttl);
+        public static Task WaitForTimeSpanAsync(bool condition, int second, Func<Task> method, TimeSpan? ttl = null) => WaitForTimeSpanAsync(() => condition, second, method, ttl);
 
         /// <summary>
         /// 
@@ -194,7 +194,7 @@
         /// <param name="method"></param>
         /// <param name="ttl"></param>
         /// <returns></returns>
-        public static async Task WaitForAsync(Func<bool> condition, int second, Func<Task> method, TimeSpan? ttl = null)
+        public static async Task WaitForTimeSpanAsync(Func<bool> condition, int second, Func<Task> method, TimeSpan? ttl = null)
         {
             var expiredTime = ttl.HasValue ? DateTime.Now.AddSeconds(ttl!.Value.TotalSeconds) : DateTime.Now.AddYears(100);
 
@@ -217,7 +217,7 @@
         /// <param name="method"></param>
         /// <param name="ttl"></param>
         /// <returns></returns>
-        public static Task WaitForAsync(bool condition, int second, Func<Task<WaitStatusEnum>> method, TimeSpan? ttl = null) => WaitForAsync(() => condition, second, method, ttl);
+        public static Task WaitForTimeSpanAsync(bool condition, int second, Func<Task<WaitStatusEnum>> method, TimeSpan? ttl = null) => WaitForTimeSpanAsync(() => condition, second, method, ttl);
 
         /// <summary>
         /// 
@@ -227,7 +227,7 @@
         /// <param name="method"></param>
         /// <param name="ttl"></param>
         /// <returns></returns>
-        public static async Task WaitForAsync(Func<bool> condition, int second, Func<Task<WaitStatusEnum>> method, TimeSpan? ttl = null)
+        public static async Task WaitForTimeSpanAsync(Func<bool> condition, int second, Func<Task<WaitStatusEnum>> method, TimeSpan? ttl = null)
         {
             var expiredTime = ttl.HasValue ? DateTime.Now.AddSeconds(ttl!.Value.TotalSeconds) : DateTime.Now.AddYears(100);
 
@@ -252,7 +252,7 @@
         /// <param name="method"></param>
         /// <param name="count"></param>
         /// <returns></returns>
-        public static Task WaitForAsync(bool condition, int second, Action method, int? count = null) => WaitForAsync(() => condition, second, method, count);
+        public static Task WaitForCountAsync(bool condition, int second, Action method, int? count = null) => WaitForCountAsync(() => condition, second, method, count);
 
         /// <summary>
         /// 
@@ -262,7 +262,7 @@
         /// <param name="method"></param>
         /// <param name="count"></param>
         /// <returns></returns>
-        public static async Task WaitForAsync(Func<bool> condition, int second, Action method, int? count = null)
+        public static async Task WaitForCountAsync(Func<bool> condition, int second, Action method, int? count = null)
         {
             var current = 0;
             count ??= int.MaxValue;
@@ -286,7 +286,7 @@
         /// <param name="method"></param>
         /// <param name="count"></param>
         /// <returns></returns>
-        public static Task WaitForAsync(bool condition, int second, Func<WaitStatusEnum> method, int? count = null) => WaitForAsync(() => condition, second, method, count);
+        public static Task WaitForCountAsync(bool condition, int second, Func<WaitStatusEnum> method, int? count = null) => WaitForCountAsync(() => condition, second, method, count);
 
         /// <summary>
         /// 
@@ -296,7 +296,7 @@
         /// <param name="method"></param>
         /// <param name="count"></param>
         /// <returns></returns>
-        public static async Task WaitForAsync(Func<bool> condition, int second, Func<WaitStatusEnum> method, int? count = null)
+        public static async Task WaitForCountAsync(Func<bool> condition, int second, Func<WaitStatusEnum> method, int? count = null)
         {
             var current = 0;
             count ??= int.MaxValue;
@@ -322,7 +322,7 @@
         /// <param name="method"></param>
         /// <param name="count"></param>
         /// <returns></returns>
-        public static Task WaitForAsync(bool condition, int second, Func<Task> method, int? count = null) => WaitForAsync(() => condition, second, method, count);
+        public static Task WaitForCountAsync(bool condition, int second, Func<Task> method, int? count = null) => WaitForCountAsync(() => condition, second, method, count);
 
         /// <summary>
         /// 
@@ -332,7 +332,7 @@
         /// <param name="method"></param>
         /// <param name="count"></param>
         /// <returns></returns>
-        public static async Task WaitForAsync(Func<bool> condition, int second, Func<Task> method, int? count = null)
+        public static async Task WaitForCountAsync(Func<bool> condition, int second, Func<Task> method, int? count = null)
         {
             var current = 0;
             count ??= int.MaxValue;
@@ -356,7 +356,7 @@
         /// <param name="method"></param>
         /// <param name="count"></param>
         /// <returns></returns>
-        public static Task WaitForAsync(bool condition, int second, Func<Task<WaitStatusEnum>> method, int? count = null) => WaitForAsync(() => condition, second, method, count);
+        public static Task WaitForCountAsync(bool condition, int second, Func<Task<WaitStatusEnum>> method, int? count = null) => WaitForCountAsync(() => condition, second, method, count);
 
         /// <summary>
         /// 
@@ -366,7 +366,7 @@
         /// <param name="method"></param>
         /// <param name="count"></param>
         /// <returns></returns>
-        public static async Task WaitForAsync(Func<bool> condition, int second, Func<Task<WaitStatusEnum>> method, int? count = null)
+        public static async Task WaitForCountAsync(Func<bool> condition, int second, Func<Task<WaitStatusEnum>> method, int? count = null)
         {
             var current = 0;
             count ??= int.MaxValue;

@@ -65,7 +65,7 @@ namespace Lycoris.Common.Http
         /// <summary>
         /// 
         /// </summary>
-        public string ContentType { get; private set; } = $"application/json;utf-8";
+        public string ContentType => $"{this.MediaType.TrimEnd(';')};{this.CharSet}";
 
         /// <summary>
         /// 
@@ -138,7 +138,7 @@ namespace Lycoris.Common.Http
         {
             if (!MediaType.IsNullOrEmpty())
             {
-                var array = ContentType.Split(';');
+                var array = MediaType.Split(';');
                 this.MediaType = array[0];
 
             }
@@ -172,7 +172,7 @@ namespace Lycoris.Common.Http
         public HttpUtils AddRequestHeader(string key, string value)
         {
             if (this.ContentTypeKey.Contains(key.ToLower()))
-                this.ContentType = value;
+                this.SetContentType(value);
 
             this.Headers ??= new Dictionary<string, string>();
             this.Headers.Add(key, value);
@@ -563,21 +563,10 @@ namespace Lycoris.Common.Http
 
             // ContentType
             if (this.Request.Content != null && this.Request.Method != HttpMethod.Get)
-            {
-                this.Request.Content.Headers.ContentType = new MediaTypeHeaderValue(this.MediaType.IsNullOrEmpty() ? "" : "application/json") { CharSet = CharSet };
-            }
+                this.Request.Content.Headers.ContentType = new MediaTypeHeaderValue(this.MediaType.IsNullOrEmpty() ? "application/json" : this.MediaType) { CharSet = this.CharSet };
 
-            var contentType = this.Headers.Where(x => this.ContentTypeKey.Contains(x.Key.ToLower())).SingleOrDefault();
-
-            if (contentType.Value.IsNullOrEmpty())
-            {
-                if (this.Request.Method == HttpMethod.Post)
-                    this.Request.Headers.TryAddWithoutValidation("ContentType", $"application/json; {CharSet}");
-            }
-            else
-            {
-                this.Request.Headers.TryAddWithoutValidation("ContentType", contentType.Value);
-            }
+            if (this.Request.Method == HttpMethod.Post)
+                this.Request.Headers.TryAddWithoutValidation("Content-Type", $"{this.MediaType.TrimEnd(';')};{this.CharSet}");
         }
 
         /// <summary>

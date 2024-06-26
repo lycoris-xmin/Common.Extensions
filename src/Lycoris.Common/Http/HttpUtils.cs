@@ -50,7 +50,7 @@ namespace Lycoris.Common.Http
         /// <summary>
         /// 
         /// </summary>
-        public string JsonBody { get; private set; } = string.Empty;
+        public string Body { get; private set; } = string.Empty;
 
         /// <summary>
         /// 
@@ -197,9 +197,9 @@ namespace Lycoris.Common.Http
         /// </summary>
         /// <param name="body"></param>
         /// <returns></returns>
-        public HttpUtils AddJsonBody(string body)
+        public HttpUtils AddBody(string body)
         {
-            this.JsonBody = body;
+            this.Body = body;
             this.FormData = new Dictionary<string, string>();
             this.FormFileData = new Dictionary<string, string>();
             return this;
@@ -212,7 +212,8 @@ namespace Lycoris.Common.Http
         /// <returns></returns>
         public HttpUtils AddJsonBody<T>(T body) where T : class
         {
-            this.JsonBody = body.ToJson();
+            this.SetContentType();
+            this.Body = body.ToJson();
             this.FormData = new Dictionary<string, string>();
             this.FormFileData = new Dictionary<string, string>();
             return this;
@@ -228,7 +229,7 @@ namespace Lycoris.Common.Http
         {
             this.FormData ??= new Dictionary<string, string>();
             this.FormData.Add(key, value);
-            this.JsonBody = string.Empty;
+            this.Body = string.Empty;
             return this;
         }
 
@@ -242,7 +243,7 @@ namespace Lycoris.Common.Http
         {
             this.FormFileData ??= new Dictionary<string, string>();
             this.FormFileData.Add(fileName, filePath);
-            this.JsonBody = string.Empty;
+            this.Body = string.Empty;
             return this;
         }
 
@@ -534,8 +535,8 @@ namespace Lycoris.Common.Http
 
             this.Request.RequestUri = new Uri(this.Url);
 
-            if (this.JsonBody.IsNullOrEmpty() == false)
-                this.Request.Content = new StringContent(this.JsonBody, this.RequestEncoding);
+            if (this.Body.IsNullOrEmpty() == false)
+                this.Request.Content = new StringContent(this.Body, this.RequestEncoding);
             else if (FormData != null && this.FormData.Any() || this.FormFileData != null && this.FormFileData.Any())
             {
                 var formContent = new MultipartFormDataContent();
@@ -618,7 +619,7 @@ namespace Lycoris.Common.Http
             this.Url = string.Empty;
             this.Headers = new Dictionary<string, string>();
             this.QueryParams = new Dictionary<string, string>();
-            this.JsonBody = string.Empty;
+            this.Body = string.Empty;
             this.FormData = new Dictionary<string, string>();
             this.FormFileData = new Dictionary<string, string>();
             this.Request = new HttpRequestMessage();

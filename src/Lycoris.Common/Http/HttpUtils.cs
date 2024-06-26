@@ -535,8 +535,8 @@ namespace Lycoris.Common.Http
 
             this.Request.RequestUri = new Uri(this.Url);
 
-            if (this.Body.IsNullOrEmpty() == false)
-                this.Request.Content = new StringContent(this.Body, this.RequestEncoding);
+            if (!this.Body.IsNullOrEmpty())
+                this.Request.Content = new StringContent(this.Body, this.RequestEncoding, this.MediaType);
             else if (FormData != null && this.FormData.Any() || this.FormFileData != null && this.FormFileData.Any())
             {
                 var formContent = new MultipartFormDataContent();

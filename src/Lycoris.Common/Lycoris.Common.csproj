@@ -11,7 +11,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/lycoris-xmin/Common.Extensions</RepositoryUrl>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <Version>8.0.4-rc1.1</Version>
+    <Version>8.0.5</Version>
     <Description>常用扩展功能及部分工具类</Description>
   </PropertyGroup>
 

@@ -1,4 +1,5 @@
 ﻿using Lycoris.Common.Extensions;
+using System.Runtime.InteropServices;
 
 namespace Lycoris.Common.Helper
 {
@@ -23,7 +24,10 @@ namespace Lycoris.Common.Helper
 
             // 逐个检查路径中的每个子目录，并创建不存在的目录  
             var parts = path.Split(Path.DirectorySeparatorChar);
-            var currentPath = string.Empty;
+
+            // 判断运行环境
+            var currentPath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? string.Empty : "/";
+
             foreach (var part in parts)
             {
                 if (part.IsNullOrEmpty())

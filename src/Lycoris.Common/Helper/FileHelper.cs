@@ -1,4 +1,6 @@
-﻿namespace Lycoris.Common.Helper
+﻿using Lycoris.Common.Extensions;
+
+namespace Lycoris.Common.Helper
 {
     /// <summary>
     /// 
@@ -24,6 +26,9 @@
             var currentPath = string.Empty;
             foreach (var part in parts)
             {
+                if (part.IsNullOrEmpty())
+                    continue;
+
                 currentPath = Path.Combine(currentPath, part);
                 if (!Directory.Exists(currentPath))
                 {

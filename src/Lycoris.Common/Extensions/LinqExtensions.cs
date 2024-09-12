@@ -197,6 +197,22 @@ namespace Lycoris.Common.Extensions
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="data"></param>
+        /// <param name="condition"></param>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public static T UpdatePorpertyIf<T>(this T data, Func<T, bool> condition, Action<T> action)
+        {
+            if (condition.Invoke(data))
+                action(data);
+
+            return data;
+        }
+
+        /// <summary>
         /// 扩展 Between 操作符
         /// 使用 var query = repository.Between(person => person.Age, 18, 21);
         /// </summary>

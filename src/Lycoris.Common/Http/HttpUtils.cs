@@ -519,10 +519,6 @@ namespace Lycoris.Common.Http
             {
                 throw;
             }
-            finally
-            {
-                RequestReset();
-            }
         }
 
         private void MapHttpRequestMessage()

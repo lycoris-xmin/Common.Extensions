@@ -166,7 +166,7 @@ namespace Lycoris.Common.Extensions
         /// <param name="query"></param>
         /// <param name="expression"></param>
         /// <returns></returns>
-        public static TResult? PageSum<T, TResult>(this IEnumerable<T> query, Expression<Func<IGrouping<int, T>, TResult>> expression)
+        public static IQueryable<TResult>? PageSum<T, TResult>(this IEnumerable<T> query, Expression<Func<IGrouping<int, T>, TResult>> expression)
             => query.AsQueryable().PageSum(expression) ?? default;
 
         /// <summary>
@@ -177,8 +177,8 @@ namespace Lycoris.Common.Extensions
         /// <param name="query"></param>
         /// <param name="expression"></param>
         /// <returns></returns>
-        public static TResult? PageSum<T, TResult>(this IQueryable<T> query, Expression<Func<IGrouping<int, T>, TResult>> expression)
-            => query.GroupBy(x => 1).Select(expression).SingleOrDefault() ?? default;
+        public static IQueryable<TResult>? PageSum<T, TResult>(this IQueryable<T> query, Expression<Func<IGrouping<int, T>, TResult>> expression)
+            => query.GroupBy(x => 1).Select(expression);
 
         /// <summary>
         /// 
@@ -191,6 +191,22 @@ namespace Lycoris.Common.Extensions
         public static T UpdatePorpertyIf<T>(this T data, bool condition, Action<T> action)
         {
             if (condition)
+                action(data);
+
+            return data;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="data"></param>
+        /// <param name="condition"></param>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public static T UpdatePorpertyIf<T>(this T data, Func<T, bool> condition, Action<T> action)
+        {
+            if (condition.Invoke(data))
                 action(data);
 
             return data;

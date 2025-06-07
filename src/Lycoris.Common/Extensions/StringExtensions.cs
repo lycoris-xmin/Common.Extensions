@@ -12,6 +12,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Web;
 
@@ -547,5 +548,50 @@ namespace Lycoris.Common.Extensions
             return field == null ? default : (T?)field.Field.GetRawConstantValue();
         }
         #endregion
+
+        /// <summary>
+        /// 只替换第一个符合要求的字符
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="search"></param>
+        /// <param name="replace"></param>
+        /// <returns></returns>
+        public static string ReplaceFirst(this string text, string search, string replace)
+        {
+            int pos = text.IndexOf(search, StringComparison.Ordinal);
+            if (pos < 0)
+            {
+                return text;
+            }
+            return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
+        }
+
+        /// <summary>
+        /// 判断字符串是否为有效的 JSON 格式（对象或数组）
+        /// </summary>
+        /// <param name="input">待判断的字符串</param>
+        /// <returns>是否是 JSON</returns>
+        public static bool IsJson(this string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return false;
+
+            input = input.Trim();
+
+            // 判断是否以 {} 或 [] 开头结尾
+            if ((!input.StartsWith("{") || !input.EndsWith("}")) &&
+                (!input.StartsWith("[") || !input.EndsWith("]")))
+                return false;
+
+            try
+            {
+                JsonDocument.Parse(input);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

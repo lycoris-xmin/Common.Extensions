@@ -10,8 +10,6 @@ using Lycoris.Common.Extensions.Extensions;
 using Lycoris.Common.Extensions.Extensions.Models;
 */
 using Lycoris.Common.Extensions.Models;
-using Newtonsoft.Json;
-using System.Collections;
 using System.Reflection;
 
 namespace Lycoris.Common.Extensions
@@ -68,6 +66,19 @@ namespace Lycoris.Common.Extensions
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        public static async Task ForEachAsync<T>(this IEnumerable<T> obj, Func<T, Task> func)
+        {
+            foreach (T item in obj)
+                await func.Invoke(item);
+        }
+
+        /// <summary>
         /// foreach循环
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -81,6 +92,23 @@ namespace Lycoris.Common.Extensions
             foreach (var item in array)
             {
                 action(item);
+            }
+        }
+
+        /// <summary>
+        /// foreach循环
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="func"></param>
+        public static async Task ForEachAsync<T>(this T[]? array, Func<T, Task> func)
+        {
+            if (array == null || array.Length == 0)
+                return;
+
+            foreach (var item in array)
+            {
+                await func.Invoke(item);
             }
         }
 

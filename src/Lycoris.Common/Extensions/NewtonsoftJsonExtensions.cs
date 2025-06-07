@@ -1,16 +1,4 @@
-﻿
-/* 项目“Lycoris.Common (net7.0)”的未合并的更改
-在此之前:
-using Newtonsoft.Json;
-在此之后:
-using Lycoris;
-using Lycoris.Common;
-using Lycoris.Common.Extensions;
-using Lycoris.Common.Extensions;
-using Lycoris.Common.Extensions.Extensions;
-using Newtonsoft.Json;
-*/
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using System.Reflection;
@@ -400,7 +388,17 @@ namespace Lycoris.Common.Extensions
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
-        public static string ToJsonString(this string str) => str.ToJObject().ToJson();
+        public static string ToJsonString(this string str)
+        {
+            try
+            {
+                return str.ToJObject().ToJson();
+            }
+            catch
+            {
+                return str;
+            }
+        }
     }
 
     /// <summary>

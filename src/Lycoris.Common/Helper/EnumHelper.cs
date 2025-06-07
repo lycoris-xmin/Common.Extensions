@@ -33,9 +33,17 @@ namespace Lycoris.Common.Helper
         /// <typeparam name="T"></typeparam>
         /// <param name="enumValue"></param>
         /// <returns></returns>
-        public static bool CheckEnumValueExists<T>(int enumValue)
+        public static bool CheckEnumValueExists<T>(int enumValue) => CheckEnumValueExists(typeof(T), enumValue);
+
+        /// <summary>
+        /// 核验枚举值是否存在
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="enumValue"></param>
+        /// <returns></returns>
+        public static bool CheckEnumValueExists(Type type, int enumValue)
         {
-            var fields = typeof(T).GetFields(BindingFlags.Public | BindingFlags.Static);
+            var fields = type.GetFields(BindingFlags.Public | BindingFlags.Static);
 
             var enumValueList = new List<int>();
             foreach (var item in fields)

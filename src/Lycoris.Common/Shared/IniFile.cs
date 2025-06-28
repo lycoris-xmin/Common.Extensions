@@ -183,7 +183,7 @@ namespace Lycoris.Common.Shared
                 foreach (var kv in sec.KeyValues)
                 {
                     foreach (var comment in kv.Value.Comments)
-                        sb.AppendLine(comment);
+                        sb.AppendLine($"# {comment}");
 
                     sb.AppendLine($"{kv.Key}={kv.Value.Value}");
                 }

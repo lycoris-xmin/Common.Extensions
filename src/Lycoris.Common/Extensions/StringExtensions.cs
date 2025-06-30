@@ -593,5 +593,44 @@ namespace Lycoris.Common.Extensions
                 return false;
             }
         }
+
+        /// <summary>
+        /// 大驼峰命名
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static string ToPascalCase(this string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) 
+                return input;
+
+            var words = input.Replace("-", "_") // 支持 kebab-case
+                             .Split(new[] { '_' }, StringSplitOptions.RemoveEmptyEntries)
+                             .Select(word => char.ToUpperInvariant(word[0]) + (word.Length > 1 ? word.Substring(1).ToLowerInvariant() : string.Empty));
+
+            return string.Concat(words);
+        }
+
+        /// <summary>
+        /// 转换为小驼峰（camelCase）命名
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static string ToCamelCase(this string input)
+        {
+            var pascal = input.ToPascalCase();
+
+            if (string.IsNullOrEmpty(pascal))
+                return pascal;
+
+            return char.ToLowerInvariant(pascal[0]) + pascal.Substring(1);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static string RemoveUrlScheme(this string? str) => str.IsNullOrEmpty() ? "" : Regex.Replace(str!, @"^(http://|https://)", string.Empty);
     }
 }

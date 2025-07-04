@@ -601,7 +601,7 @@ namespace Lycoris.Common.Extensions
         /// <returns></returns>
         public static string ToPascalCase(this string input)
         {
-            if (string.IsNullOrWhiteSpace(input)) 
+            if (string.IsNullOrWhiteSpace(input))
                 return input;
 
             var words = input.Replace("-", "_") // 支持 kebab-case

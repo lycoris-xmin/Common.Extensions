@@ -115,10 +115,48 @@ namespace Lycoris.Common.Extensions
         /// 移除满足条件的元素
         /// </summary>
         /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static T[] RemoveWhere<T>(this T[] array, Func<T, bool> predicate)
+        {
+            var list = new List<T>();
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (!predicate(array[i]))
+                    list.Add(array[i]);
+            }
+
+            return [.. list];
+        }
+
+        /// <summary>
+        /// 移除满足条件的元素
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static T[] RemoveWhere<T>(this T[] array, Func<int, T, bool> predicate)
+        {
+            var list = new List<T>();
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (!predicate(i, array[i]))
+                    list.Add(array[i]);
+            }
+
+            return [.. list];
+        }
+
+        /// <summary>
+        /// 移除满足条件的元素
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <param name="list"></param>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        public static List<T> Remove<T>(this List<T> list, Func<T, bool> predicate)
+        public static IList<T> RemoveWhere<T>(this IList<T> list, Func<T, bool> predicate)
         {
             for (int i = 0; i < list.Count; i++)
             {
@@ -130,6 +168,55 @@ namespace Lycoris.Common.Extensions
             }
 
             return list;
+        }
+
+        /// <summary>
+        /// 移除满足条件的元素
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="dic"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static Dictionary<TKey, TValue> RemoveWhere<TKey, TValue>(this Dictionary<TKey, TValue> dic, Func<TKey, TValue, bool> predicate) where TKey : notnull
+        {
+            if (!dic.HasValue())
+                return default!;
+
+            var map = new Dictionary<TKey, TValue>();
+
+            foreach (var item in dic)
+            {
+                if (!predicate.Invoke(item.Key, item.Value))
+                    map.Add(item.Key, item.Value);
+            }
+
+            return map;
+        }
+
+        /// <summary>
+        /// 移除满足条件的元素
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="dic"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static Dictionary<TKey, TValue> RemoveWhere<TKey, TValue>(this Dictionary<TKey, TValue> dic, Func<int, TKey, TValue, bool> predicate) where TKey : notnull
+        {
+            if (!dic.HasValue())
+                return default!;
+
+            var i = 0;
+            var map = new Dictionary<TKey, TValue>();
+
+            foreach (var item in dic)
+            {
+                if (!predicate.Invoke(i++, item.Key, item.Value))
+                    map.Add(item.Key, item.Value);
+            }
+
+            return map;
         }
 
         /// <summary>

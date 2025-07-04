@@ -1,15 +1,4 @@
-﻿
-/* 项目“Lycoris.Common (net7.0)”的未合并的更改
-在此之前:
-using Lycoris.Common.Extensions.Extensions.Models;
-在此之后:
-using Lycoris;
-using Lycoris.Common;
-using Lycoris.Common.Extensions.Extensions;
-using Lycoris.Common.Extensions.Extensions;
-using Lycoris.Common.Extensions.Extensions.Models;
-*/
-using Lycoris.Common.Extensions.Models;
+﻿using Lycoris.Common.Extensions.Models;
 using System.Reflection;
 
 namespace Lycoris.Common.Extensions
@@ -90,9 +79,7 @@ namespace Lycoris.Common.Extensions
                 return;
 
             foreach (var item in array)
-            {
                 action(item);
-            }
         }
 
         /// <summary>
@@ -107,9 +94,7 @@ namespace Lycoris.Common.Extensions
                 return;
 
             foreach (var item in array)
-            {
                 await func.Invoke(item);
-            }
         }
 
         /// <summary>
@@ -164,8 +149,8 @@ namespace Lycoris.Common.Extensions
         /// <returns></returns>
         public static string ToAsciiSortParams<T>(this T data, params string[] ignoreProperty)
         {
-            Type type = typeof(T);
-            PropertyInfo[] properties = type.GetProperties();
+            var type = typeof(T);
+            var properties = type.GetProperties();
 
             var dic = new Dictionary<string, string>();
 
@@ -184,23 +169,35 @@ namespace Lycoris.Common.Extensions
         }
 
         /// <summary>
-        /// 判断一个类是否继承了另一个类
+        /// 判断一个类是否继承自另一个类（支持泛型基类）
         /// </summary>
-        /// <param name="type"></param>
-        /// <param name="subclass"></param>
-        /// <returns></returns>
-        public static bool IsSubclassFrom(this Type type, Type subclass)
+        /// <param name="type">当前类型</param>
+        /// <param name="subclass">目标父类或泛型定义</param>
+        /// <returns>是否为其子类</returns>
+        public static bool IsSubclassFrom(this Type? type, Type subclass)
         {
-            var isGenericType = type.BaseType?.IsGenericType ?? false;
-
-            if (isGenericType)
-                return type.BaseType!.GetGenericTypeDefinition() == subclass;
-            else if (type.IsSubclassOf(subclass))
-                return true;
-            else if (type.BaseType == subclass)
-                return true;
-            else
+            if (type == null || subclass == null)
                 return false;
+
+            while (type != null && type != typeof(object))
+            {
+                if (type == subclass)
+                    return true;
+
+                if (subclass.IsGenericTypeDefinition && type.IsGenericType)
+                {
+                    if (type.GetGenericTypeDefinition() == subclass)
+                        return true;
+                }
+                else if (type == subclass || type.IsSubclassOf(subclass))
+                {
+                    return true;
+                }
+
+                type = type.BaseType;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -211,27 +208,32 @@ namespace Lycoris.Common.Extensions
         public static bool IsSubclassFrom<T>(this Type type) where T : class => type.IsSubclassFrom(typeof(T));
 
         /// <summary>
-        /// 判断一个类是否实现了某个接口
+        /// 判断一个类型是否实现了指定接口（支持泛型接口）
         /// </summary>
         /// <param name="type"></param>
         /// <param name="interface"></param>
         /// <returns></returns>
         public static bool IsInterfaceFrom(this Type type, Type @interface)
         {
-            var intarfaces = type.GetInterfaces();
-            if (intarfaces == null || intarfaces.Length == 0)
+            if (type == null || @interface == null)
                 return false;
 
-            if (@interface.IsGenericType)
+            var interfaces = type.GetInterfaces();
+            if (interfaces == null || interfaces.Length == 0)
+                return false;
+
+            if (@interface.IsGenericTypeDefinition)
             {
-                foreach (var item in intarfaces)
+                foreach (var item in interfaces)
                 {
-                    if (item.GetGenericTypeDefinition() == @interface)
+                    if (item.IsGenericType && item.GetGenericTypeDefinition() == @interface)
                         return true;
                 }
             }
             else
-                return intarfaces.Any(x => x == @interface);
+            {
+                return interfaces.Any(x => x == @interface);
+            }
 
             return false;
         }
@@ -303,190 +305,5 @@ namespace Lycoris.Common.Extensions
             if (dic.ContainsKey(key))
                 dic.Remove(key);
         }
-
-        //public static T ToObject<T>(IDictionary dict) where T : class, new()
-        //{
-        //    T obj = new T();
-        //    if (dict == null)
-        //    {
-        //        return null;
-        //    }
-
-        //    return ToObject(dict.Keys.Cast<string>().ToDictionary((string key) => key, (string key) => dict[key]), obj);
-        //}
-
-        //public static T ToObject<T>(Dictionary<string, object> dict, T obj) where T : class
-        //{
-        //    if (dict == null)
-        //    {
-        //        return null;
-        //    }
-
-        //    PropertyInfo[] properties = obj.GetType().GetProperties();
-        //    foreach (PropertyInfo propertyInfo in properties)
-        //    {
-        //        Type propertyType = propertyInfo.PropertyType;
-        //        string key = ((!(propertyInfo.GetCustomAttribute(typeof(NameInMapAttribute)) is NameInMapAttribute nameInMapAttribute)) ? propertyInfo.Name : nameInMapAttribute.Name);
-        //        if (dict.ContainsKey(key))
-        //        {
-        //            object obj2 = dict[key];
-        //            if (obj2 == null)
-        //            {
-        //                propertyInfo.SetValue(obj, obj2);
-        //            }
-        //            else
-        //            {
-        //                propertyInfo.SetValue(obj, MapObj(propertyType, obj2));
-        //            }
-        //        }
-        //    }
-
-        //    return obj;
-        //}
-
-        //private static object MapObj(Type propertyType, object value)
-        //{
-        //    if (value == null)
-        //    {
-        //        return null;
-        //    }
-
-        //    if (propertyType.Equals(typeof(string)))
-        //    {
-        //        if (typeof(IList).IsAssignableFrom(value.GetType()) || typeof(IDictionary).IsAssignableFrom(value.GetType()))
-        //        {
-        //            return JsonConvert.SerializeObject(value);
-        //        }
-
-        //        return Convert.ToString(value);
-        //    }
-
-        //    if (typeof(IList).IsAssignableFrom(value.GetType()) && !typeof(Array).IsAssignableFrom(value.GetType()))
-        //    {
-        //        object obj = Activator.CreateInstance(propertyType);
-        //        Type[] genericArguments = propertyType.GetGenericArguments();
-        //        if (genericArguments.Length == 0 || genericArguments == null)
-        //        {
-        //            return value;
-        //        }
-
-        //        Type type = genericArguments[0];
-        //        {
-        //            foreach (object item in (IList)value)
-        //            {
-        //                MethodInfo method = propertyType.GetMethod("Add", new Type[1] { type });
-        //                if (method != null)
-        //                {
-        //                    if (item == null)
-        //                    {
-        //                        method.Invoke(obj, new object[1]);
-        //                        continue;
-        //                    }
-
-        //                    object obj2 = MapObj(type, item);
-        //                    method.Invoke(obj, new object[1] { obj2 });
-        //                }
-        //            }
-
-        //            return obj;
-        //        }
-        //    }
-
-        //    if (typeof(TeaModel).IsAssignableFrom(propertyType))
-        //    {
-        //        object obj3 = Activator.CreateInstance(propertyType);
-        //        return ToObject(((IDictionary)value).Keys.Cast<string>().ToDictionary((string key) => key, (string key) => ((IDictionary)value)[key]), obj3);
-        //    }
-
-        //    if (typeof(IDictionary).IsAssignableFrom(propertyType))
-        //    {
-        //        IDictionary dictionary = (IDictionary)value;
-        //        if (dictionary.Count == 0)
-        //        {
-        //            return dictionary;
-        //        }
-
-        //        IDictionary dictionary2;
-        //        if (propertyType.Equals(typeof(IDictionary)))
-        //        {
-        //            dictionary2 = dictionary;
-        //        }
-        //        else
-        //        {
-        //            dictionary2 = (IDictionary)Activator.CreateInstance(propertyType);
-        //            Type propertyType2 = propertyType.GetGenericArguments()[1];
-        //            foreach (DictionaryEntry item2 in dictionary)
-        //            {
-        //                if (item2.Value == null)
-        //                {
-        //                    dictionary2.Add(item2.Key, null);
-        //                    continue;
-        //                }
-
-        //                item2.Value.GetType();
-        //                dictionary2.Add(item2.Key, MapObj(propertyType2, item2.Value));
-        //            }
-        //        }
-
-        //        return dictionary2;
-        //    }
-
-        //    if (propertyType.Equals(typeof(object)))
-        //    {
-        //        return value;
-        //    }
-
-        //    if (propertyType.Equals(typeof(int)) && value is long)
-        //    {
-        //        return Convert.ToInt32((long)value);
-        //    }
-
-        //    if (propertyType == typeof(int?))
-        //    {
-        //        return Convert.ToInt32(value);
-        //    }
-
-        //    if (propertyType == typeof(long?))
-        //    {
-        //        return Convert.ToInt64(value);
-        //    }
-
-        //    if (propertyType == typeof(float?))
-        //    {
-        //        return Convert.ToSingle(value);
-        //    }
-
-        //    if (propertyType == typeof(double?))
-        //    {
-        //        return Convert.ToDouble(value);
-        //    }
-
-        //    if (propertyType == typeof(bool?))
-        //    {
-        //        return Convert.ToBoolean(value);
-        //    }
-
-        //    if (propertyType == typeof(short?))
-        //    {
-        //        return Convert.ToInt16(value);
-        //    }
-
-        //    if (propertyType == typeof(ushort?))
-        //    {
-        //        return Convert.ToUInt16(value);
-        //    }
-
-        //    if (propertyType == typeof(uint?))
-        //    {
-        //        return Convert.ToUInt32(value);
-        //    }
-
-        //    if (propertyType == typeof(ulong?))
-        //    {
-        //        return Convert.ToUInt64(value);
-        //    }
-
-        //    return Convert.ChangeType(value, propertyType);
-        //}
     }
 }

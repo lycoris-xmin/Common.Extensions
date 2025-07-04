@@ -10,7 +10,7 @@
 		<PackageReadmeFile></PackageReadmeFile>
 		<RepositoryUrl>https://github.com/lycoris-xmin/Common.Extensions</RepositoryUrl>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
-		<Version>8.1.1</Version>
+		<Version>8.1.2</Version>
 		<Description>常用扩展功能及部分工具类</Description>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	</PropertyGroup>

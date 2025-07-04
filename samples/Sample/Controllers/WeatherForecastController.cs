@@ -22,9 +22,7 @@ namespace Sample.Controllers
         [HttpGet]
         public async Task<IEnumerable<WeatherForecast>> Get()
         {
-            var path = $"{AppContext.BaseDirectory}/About/set";
-
-            FileHelper.EnsurePathExists(path);
+            var result = IPAddressHelper.Search("110.89.30.188");
 
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {

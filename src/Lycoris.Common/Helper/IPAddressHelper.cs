@@ -1,8 +1,10 @@
-﻿using Lycoris.Common.Extensions;
+﻿using IP2Region.Net.Abstractions;
+using IP2Region.Net.XDB;
+using Lycoris.Common.Extensions;
 using Lycoris.Common.Properties;
+using MaxMind.GeoIP2;
 using System.Net;
 using System.Security.Authentication;
-using System.Text;
 
 namespace Lycoris.Common.Helper
 {
@@ -11,17 +13,8 @@ namespace Lycoris.Common.Helper
     /// </summary>
     public class IPAddressHelper
     {
-        private const int HeaderInfoLength = 256;
-        private const int VectorIndexRows = 256;
-        private const int VectorIndexCols = 256;
-        private const int VectorIndexSize = 8;
-        private const int SegmentIndexSize = 14;
-
-        private static readonly byte[]? _vectorIndex;
-        private static readonly MemoryStream? _contentStream;
-        private static byte[]? _contentBuff;
-        private static FileStream? _fileStream;
-        private static CachePolicy _cachePolicy = CachePolicy.Content;
+        private static ISearcher _ip2RegionSearcher;
+        private static DatabaseReader? _maxMindReader;
 
         /// <summary>
         /// 
@@ -33,81 +26,24 @@ namespace Lycoris.Common.Helper
         /// </summary>
         static IPAddressHelper()
         {
-            _contentStream = new MemoryStream(Resources.ip2region);
+            var ip2XdbPath = EmbeddedResourceHelper.ExportToAssemblyScopedPath(Resources.ip2region, "ip2region.xdb");
+            _ip2RegionSearcher = new Searcher(CachePolicy.Content, ip2XdbPath);
 
-            switch (_cachePolicy)
-            {
-                case CachePolicy.Content:
-                    using (var stream = new MemoryStream())
-                    {
-                        _contentStream.CopyTo(stream);
-                        _contentBuff = stream.ToArray();
-                    }
-                    break;
-                case CachePolicy.VectorIndex:
-                    var vectorLength = VectorIndexRows * VectorIndexCols * VectorIndexSize;
-                    _vectorIndex = new byte[vectorLength];
-                    Read(HeaderInfoLength, _vectorIndex);
-                    break;
-            }
+            var maxMindDbPath = EmbeddedResourceHelper.ExportToAssemblyScopedPath(Resources.maxmind, "maxmind.mmdb");
+            _maxMindReader = new DatabaseReader(maxMindDbPath);
         }
 
         /// <summary>
-        /// 
+        /// 加载本地xdb文件
         /// </summary>
-        ~IPAddressHelper()
-        {
-            if (_contentStream != null)
-            {
-                _contentStream.Close();
-                _contentStream.Dispose();
-            }
-
-            if (_fileStream != null)
-            {
-                _fileStream.Close();
-                _fileStream.Dispose();
-            }
-        }
+        /// <param name="path"></param>
+        public static void LoadIP2RegionDb(string path) => _ip2RegionSearcher = new Searcher(CachePolicy.Content, path);
 
         /// <summary>
-        /// 
+        /// 加载本地mmdb文件
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <exception cref="FileNotFoundException"></exception>
-        public static void LoadXDBFile(string filePath)
-        {
-            if (!File.Exists(filePath))
-                throw new FileNotFoundException(filePath);
-
-            _fileStream = File.OpenRead(filePath);
-
-            if (_contentStream != null)
-            {
-                _contentStream.Close();
-                _contentStream.Dispose();
-            }
-
-            using var stream = new MemoryStream();
-            _fileStream.CopyTo(stream);
-            _contentBuff = stream.ToArray();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
-        public static uint GetMidIp(uint x, uint y) => (x & y) + ((x ^ y) >> 1);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
-        public static int GetMidIp(int x, int y) => (x & y) + ((x ^ y) >> 1);
+        /// <param name="path"></param>
+        public static void LoadMaxMindDb(string path) => _maxMindReader = new DatabaseReader(path);
 
         /// <summary>
         /// IP地址转Uint
@@ -143,7 +79,7 @@ namespace Lycoris.Common.Helper
         }
 
         /// <summary>
-        /// 
+        /// Uint转IP地址
         /// </summary>
         /// <param name="ipAddressUint"></param>
         /// <returns></returns>
@@ -197,23 +133,28 @@ namespace Lycoris.Common.Helper
         /// <returns></returns>
         public static bool IsPrivateNetwork(string ipv4Address)
         {
-            if (ipv4Address.ToLower() == "localhost" || ipv4Address == "127.0.0.1")
-                return true;
-
-            if (IPAddress.TryParse(ipv4Address, out _))
+            try
             {
-                if (ipv4Address.StartsWith("192.168.") || ipv4Address.StartsWith("10."))
-                    return true;
+                var address = IPAddress.Parse(ipv4Address);
+                var bytes = address.GetAddressBytes();
 
-                if (ipv4Address.StartsWith("172."))
+                return address.AddressFamily switch
                 {
-                    string seg2 = ipv4Address[4..7];
-                    if (seg2.EndsWith('.') && string.Compare(seg2, "16.") >= 0 && string.Compare(seg2, "31.") <= 0)
-                        return true;
-                }
+                    System.Net.Sockets.AddressFamily.InterNetwork => bytes[0] switch
+                    {
+                        10 => true,
+                        172 when bytes[1] >= 16 && bytes[1] <= 31 => true,
+                        192 when bytes[1] == 168 => true,
+                        _ => false
+                    },
+                    System.Net.Sockets.AddressFamily.InterNetworkV6 => address.IsIPv6LinkLocal || address.IsIPv6SiteLocal,
+                    _ => false
+                };
             }
-
-            return false;
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -227,9 +168,15 @@ namespace Lycoris.Common.Helper
                 return new IpAttribution(ipAddress) { IsPrivate = true };
 
             var ip = Ipv4ToUInt32(ipAddress);
-            var ipStr = Search(ip);
 
-            return ChangeIpAttribution(ipStr);
+            var result = QueryFromIP2Region(ip);
+
+            if (result.IsPrivate)
+                result = QueryFromMaxMind(ipAddress);
+
+            result.IP = ipAddress;
+
+            return result;
         }
 
         /// <summary>
@@ -243,11 +190,17 @@ namespace Lycoris.Common.Helper
                 return new IpAttribution(ipAddress.ToString()) { IsPrivate = true };
 
             var ip = Ipv4ToUInt32(ipAddress);
-            var ipStr = Search(ip);
-            if (ipStr.IsNullOrEmpty())
-                return new IpAttribution(ipAddress.ToString());
 
-            return ChangeIpAttribution(ipStr);
+            var result = QueryFromIP2Region(ip);
+
+            var ipStr = UInt32ToIpv4(ip);
+
+            if (result.IsPrivate)
+                result = QueryFromMaxMind(ipStr);
+
+            result.IP = ipStr;
+
+            return result;
         }
 
         /// <summary>
@@ -323,6 +276,66 @@ namespace Lycoris.Common.Helper
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="ip"></param>
+        /// <returns></returns>
+        private static IpAttribution QueryFromIP2Region(uint ip)
+        {
+            var result = _ip2RegionSearcher.Search(ip);
+
+            if (result.IsNullOrEmpty())
+                return new IpAttribution() { IsPrivate = true };
+
+            if (result!.Contains("内网IP", StringComparison.CurrentCultureIgnoreCase))
+                return new IpAttribution() { IsPrivate = true };
+
+            var addressArray = result!.Split('|');
+
+            return new IpAttribution
+            {
+                Country = addressArray[0] == "0" ? "" : addressArray[0],
+                Area = addressArray[1] == "0" ? "" : addressArray[1],
+                Province = addressArray[2] == "0" ? "" : addressArray[2],
+                City = addressArray[3] == "0" ? "" : addressArray[3],
+                Operator = addressArray[4] == "0" ? "" : addressArray[4]
+            };
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <returns></returns>
+        private static IpAttribution QueryFromMaxMind(string ip)
+        {
+            var attribution = new IpAttribution(ip);
+
+            try
+            {
+                if (_maxMindReader == null)
+                    return attribution;
+
+                var response = _maxMindReader.Country(ip);
+
+                if (response?.Country != null)
+                {
+                    attribution.Country = response.Country.Names.TryGetValue("zh-CN", out var name)
+                        ? name
+                        : response.Country.Name;
+
+                    if (response.Continent?.Names?.TryGetValue("zh-CN", out var areaName) == true)
+                        attribution.Area = areaName;
+                    else
+                        attribution.Area = response.Continent?.Name;
+                }
+            }
+            catch { }
+
+            return attribution;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <returns></returns>
         private static async Task<string> GetPublicIpAddressByIPIfyAsync()
         {
@@ -339,30 +352,50 @@ namespace Lycoris.Common.Helper
             return _ipaddress ?? "";
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         private static async Task<string> GetPublicIpAddressByICanHazipAsync()
         {
             var content = await RequestAsync("http://icanhazip.com/");
             return content ?? "";
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         private static async Task<string> GetPublicIpAddressByIfConfigAsync()
         {
             var content = await RequestAsync("http://ifconfig.me/ip");
             return content ?? "";
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         private static async Task<string> GetPublicIpAddressByIfConfig2Async()
         {
             var content = await RequestAsync("http://ifconfig.co/ip");
             return content ?? "";
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         private static async Task<string> GetPublicIpAddressByIPInfoAsync()
         {
             var content = await RequestAsync("https://ipinfo.io/ip");
             return content ?? "";
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         private static async Task<string> GetPublicIpAddressByIPApiAsync()
         {
             var content = await RequestAsync("http://ip-api.com/json");
@@ -378,6 +411,11 @@ namespace Lycoris.Common.Helper
             return jobj["query"]!.ToString();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         private static async Task<string> RequestAsync(string url)
         {
             var content = "";
@@ -401,134 +439,6 @@ namespace Lycoris.Common.Helper
             }
 
             return content ?? "";
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="ip"></param>
-        /// <returns>国家|区域|省份|城市|运营商</returns>
-        private static string? Search(uint ip)
-        {
-            var il0 = ip >> 24 & 0xFF;
-            var il1 = ip >> 16 & 0xFF;
-            var idx = il0 * VectorIndexCols * VectorIndexSize + il1 * VectorIndexSize;
-
-            uint sPtr = 0, ePtr = 0;
-
-            switch (_cachePolicy)
-            {
-                case CachePolicy.VectorIndex:
-                    {
-                        sPtr = BitConverter.ToUInt32(_vectorIndex.AsSpan()[(int)idx..]);
-                        ePtr = BitConverter.ToUInt32(_vectorIndex.AsSpan()[((int)idx + 4)..]);
-                    }
-                    break;
-                case CachePolicy.Content:
-                    {
-                        sPtr = BitConverter.ToUInt32(_contentBuff.AsSpan()[(HeaderInfoLength + (int)idx)..]);
-                        ePtr = BitConverter.ToUInt32(_contentBuff.AsSpan()[(HeaderInfoLength + (int)idx + 4)..]);
-                    }
-                    break;
-                case CachePolicy.File:
-                    {
-                        var buff = new byte[VectorIndexSize];
-                        Read((int)(idx + HeaderInfoLength), buff);
-                        sPtr = BitConverter.ToUInt32(buff);
-                        ePtr = BitConverter.ToUInt32(buff.AsSpan()[4..]);
-                    }
-                    break;
-            }
-
-
-            var dataLen = 0;
-            uint dataPtr = 0;
-            var l = 0;
-            var h = (int)((ePtr - sPtr) / SegmentIndexSize);
-            var buffer = new byte[SegmentIndexSize];
-
-            while (l <= h)
-            {
-                var mid = GetMidIp(l, h);
-                var pos = sPtr + mid * SegmentIndexSize;
-
-                Read((int)pos, buffer);
-                var sip = BitConverter.ToUInt32(buffer);
-
-                if (ip < sip)
-                    h = mid - 1;
-                else
-                {
-                    var eip = BitConverter.ToUInt32(buffer.AsSpan()[4..]);
-                    if (ip > eip)
-                        l = mid + 1;
-                    else
-                    {
-                        dataLen = BitConverter.ToUInt16(buffer.AsSpan()[8..]);
-                        dataPtr = BitConverter.ToUInt32(buffer.AsSpan()[10..]);
-                        break;
-                    }
-                }
-            }
-
-            if (dataLen == 0)
-                return default;
-
-            var regionBuff = new byte[dataLen];
-            Read((int)dataPtr, regionBuff);
-
-            return Encoding.UTF8.GetString(regionBuff);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="offset"></param>
-        /// <param name="buff"></param>
-        /// <exception cref="IOException"></exception>
-        private static void Read(int offset, byte[] buff)
-        {
-            switch (_cachePolicy)
-            {
-                case CachePolicy.Content:
-                    _contentBuff.AsSpan()[offset..(offset + buff.Length)].CopyTo(buff);
-                    break;
-                default:
-                    {
-                        _contentStream!.Seek(offset, SeekOrigin.Begin);
-                        IoCount++;
-
-                        var rLen = _contentStream.Read(buff);
-                        if (rLen != buff.Length)
-                            throw new IOException($"incomplete read: readed bytes should be {buff.Length}");
-                    }
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="ipStr"></param>
-        /// <returns></returns>
-        private static IpAttribution ChangeIpAttribution(string? ipStr)
-        {
-            if (ipStr.IsNullOrEmpty())
-                return new IpAttribution() { IsPrivate = true };
-
-            if (ipStr!.Contains("内网IP", StringComparison.CurrentCultureIgnoreCase))
-                return new IpAttribution() { IsPrivate = true };
-
-            var addressArray = ipStr!.Split('|');
-
-            return new IpAttribution
-            {
-                Country = addressArray[0] == "0" ? "" : addressArray[0],
-                Area = addressArray[1] == "0" ? "" : addressArray[1],
-                Province = addressArray[2] == "0" ? "" : addressArray[2],
-                City = addressArray[3] == "0" ? "" : addressArray[3],
-                Operator = addressArray[4] == "0" ? "" : addressArray[4]
-            };
         }
     }
 
@@ -582,27 +492,11 @@ namespace Lycoris.Common.Helper
         /// <summary>
         /// 是否局域网
         /// </summary>
-        public bool IsPrivate { get; set; }
+        public bool IsPrivate { get; set; } = false;
 
         /// <summary>
         /// 
         /// </summary>
         internal string IP { get; set; } = string.Empty;
-    }
-
-    internal enum CachePolicy
-    {
-        /// <summary>
-        /// no cache , not thread safe!
-        /// </summary>
-        File,
-        /// <summary>
-        /// cache vector index , reduce the number of IO operations , not thread safe!
-        /// </summary>
-        VectorIndex,
-        /// <summary>
-        /// default cache policy , cache whole xdb file , thread safe 
-        /// </summary>
-        Content
     }
 }

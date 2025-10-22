@@ -301,6 +301,23 @@ namespace Lycoris.Common.Extensions
             => string.IsNullOrEmpty(str) ? JObject.Parse("{}") : JObject.Parse(str.Replace("&nbsp;", ""));
 
         /// <summary>
+        /// 将Json字符串转为JObject
+        /// </summary>
+        /// <param name="str">Json字符串</param>
+        /// <returns></returns>
+        public static JObject? ToTryJObject(this string? str)
+        {
+            try
+            {
+                return str.ToJObject();
+            }
+            catch
+            {
+                return default;
+            }
+        }
+
+        /// <summary>
         /// key=value字符串转Json字符串
         /// </summary>
         /// <param name="str"></param>

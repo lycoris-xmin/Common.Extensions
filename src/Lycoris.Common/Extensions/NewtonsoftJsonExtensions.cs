@@ -187,7 +187,7 @@ namespace Lycoris.Common.Extensions
             if (string.IsNullOrEmpty(str))
                 return default;
 
-            return str.ToObject(type, setting);
+            return JsonConvert.DeserializeObject(str, type, setting);
         }
 
         /// <summary>

@@ -15,10 +15,11 @@ namespace Lycoris.Common.Extensions
         /// </summary>
         private static JsonSerializerSettings? JsonSetting = new()
         {
-            ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            ContractResolver = new PreserveDictionaryKeysResolver(),
             DateFormatString = "yyyy-MM-dd HH:mm:ss.ffffff",
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-            NullValueHandling = NullValueHandling.Ignore
+            NullValueHandling = NullValueHandling.Ignore,
+            Converters = [new DecimalStringConverter(), new LongStringConverter()]
         };
 
         /// <summary>
@@ -431,5 +432,115 @@ namespace Lycoris.Common.Extensions
         /// 
         /// </summary>
         CamelCase = 1,
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    internal class PreserveDictionaryKeysResolver : DefaultContractResolver
+    {
+        protected override JsonProperty CreateProperty(System.Reflection.MemberInfo member, MemberSerialization memberSerialization)
+        {
+            var prop = base.CreateProperty(member, memberSerialization);
+
+            // 如果是 Dictionary 类型，保持 key 原样
+            if (typeof(System.Collections.IDictionary).IsAssignableFrom(prop.PropertyType))
+            {
+                prop.PropertyName = prop.UnderlyingName; // 保持原始名字
+            }
+            else
+            {
+                // 其它类属性可以 camelCase
+                prop.PropertyName = !string.IsNullOrEmpty(prop.PropertyName)
+                    ? char.ToLowerInvariant(prop.PropertyName[0]) + prop.PropertyName.Substring(1)
+                    : prop.PropertyName; // 如果为 null 或空，保持原样
+            }
+
+            return prop;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    internal class DecimalStringConverter : JsonConverter
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="objectType"></param>
+        /// <returns></returns>
+        public override bool CanConvert(Type objectType) => objectType == typeof(decimal) || objectType == typeof(decimal?);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="value"></param>
+        /// <param name="serializer"></param>
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+        {
+            if (value == null)
+            {
+                writer.WriteNull();
+                return;
+            }
+
+            if (value is decimal dec)
+                writer.WriteValue(dec.ToString("0.00"));
+            else
+                writer.WriteValue(value.ToString());
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="objectType"></param>
+        /// <param name="existingValue"></param>
+        /// <param name="serializer"></param>
+        /// <returns></returns>
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer) => existingValue ?? 0m;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public override bool CanRead => false;
+    }
+
+    /// <summary>
+    /// long/long? → string，仅影响输出（防止前端精度丢失）
+    /// </summary>
+    internal class LongStringConverter : JsonConverter
+    {
+        /// <summary>
+        /// 判断是否可转换 long / long?
+        /// </summary>
+        public override bool CanConvert(Type objectType) => objectType == typeof(long) || objectType == typeof(long?);
+
+        /// <summary>
+        /// 序列化（输出时 long 转 string）
+        /// </summary>
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+        {
+            if (value == null)
+            {
+                writer.WriteNull();
+            }
+            else
+            {
+                writer.WriteValue(value.ToString());
+            }
+        }
+
+        /// <summary>
+        /// 禁止参与反序列化，保持默认行为（即不影响接口入参）
+        /// </summary>
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer) => existingValue ?? 0L;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public override bool CanRead => false;
     }
 }

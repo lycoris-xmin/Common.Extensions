@@ -28,10 +28,11 @@ namespace Lycoris.Common.Extensions
         public static void RestoreDefaultGlobalJsonSerializerSetting()
         {
             JsonSetting ??= new JsonSerializerSettings();
-            JsonSetting.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            JsonSetting.ContractResolver = new DefaultContractResolver();
             JsonSetting.DateFormatString = "yyyy-MM-dd HH:mm:ss.ffffff";
             JsonSetting.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             JsonSetting.NullValueHandling = NullValueHandling.Ignore;
+            JsonSetting.Converters.Clear();
         }
 
         /// <summary>
@@ -64,7 +65,7 @@ namespace Lycoris.Common.Extensions
         /// <param name="value"></param>
         /// <param name="namesContract"></param>
         /// <returns></returns>
-        public static string ToJson(this object? value, PropertyNamesContract namesContract = PropertyNamesContract.CamelCase)
+        public static string ToJson(this object? value, PropertyNamesContract namesContract = PropertyNamesContract.PreserveDictionaryKeys)
         {
             if (value == null)
                 return "";
@@ -75,9 +76,13 @@ namespace Lycoris.Common.Extensions
             {
                 settings!.ContractResolver = new DefaultContractResolver();
             }
-            else
+            else if (namesContract == PropertyNamesContract.CamelCase)
             {
                 settings!.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            }
+            else
+            {
+                settings!.ContractResolver = new PreserveDictionaryKeysResolver();
             }
 
             return JsonConvert.SerializeObject(value, settings);
@@ -179,21 +184,6 @@ namespace Lycoris.Common.Extensions
         /// <summary>
         /// Json反序列化成实体
         /// </summary>
-        /// <param name="str"></param>
-        /// <param name="type"></param>
-        /// <param name="setting"></param>
-        /// <returns></returns>
-        public static object? ToObject(this string? str, Type type, JsonSerializerSettings setting)
-        {
-            if (string.IsNullOrEmpty(str))
-                return default;
-
-            return JsonConvert.DeserializeObject(str, type, setting);
-        }
-
-        /// <summary>
-        /// Json反序列化成实体
-        /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="str"></param>
         /// <param name="type"></param>
@@ -208,6 +198,21 @@ namespace Lycoris.Common.Extensions
             configure.Invoke(setting);
 
             return str.ToObject(type, setting);
+        }
+
+        /// <summary>
+        /// Json反序列化成实体
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="type"></param>
+        /// <param name="setting"></param>
+        /// <returns></returns>
+        public static object? ToObject(this string? str, Type type, JsonSerializerSettings setting)
+        {
+            if (string.IsNullOrEmpty(str))
+                return default;
+
+            return JsonConvert.DeserializeObject(str, type, setting);
         }
 
         /// <summary>
@@ -432,6 +437,10 @@ namespace Lycoris.Common.Extensions
         /// 
         /// </summary>
         CamelCase = 1,
+        /// <summary>
+        /// 
+        /// </summary>
+        PreserveDictionaryKeys = 2
     }
 
     /// <summary>

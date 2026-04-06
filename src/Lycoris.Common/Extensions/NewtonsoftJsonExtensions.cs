@@ -15,7 +15,7 @@ namespace Lycoris.Common.Extensions
         /// </summary>
         private static JsonSerializerSettings? JsonSetting = new()
         {
-            ContractResolver = new PreserveDictionaryKeysResolver(),
+            ContractResolver = new CamelCasePropertyNamesContractResolver(),
             DateFormatString = "yyyy-MM-dd HH:mm:ss.ffffff",
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
             NullValueHandling = NullValueHandling.Ignore,

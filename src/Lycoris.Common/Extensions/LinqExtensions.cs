@@ -289,32 +289,6 @@ namespace Lycoris.Common.Extensions
         /// 
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="propertyName"></param>
-        /// <returns></returns>
-        private static Expression<Func<T, object>>? GetPropertyExpression<T>(string propertyName)
-        {
-            // 支持嵌套属性 a.b.c
-            var param = Expression.Parameter(typeof(T), "x");
-            Expression? body = param;
-
-            foreach (var part in propertyName.Split('.'))
-            {
-                var propInfo = body.Type.GetProperty(part, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-                if (propInfo == null) return null;
-                body = Expression.Property(body, propInfo);
-            }
-
-            // 如果是值类型需要装箱
-            if (body.Type.IsValueType)
-                body = Expression.Convert(body, typeof(object));
-
-            return Expression.Lambda<Func<T, object>>(body, param);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <typeparam name="TSelector"></typeparam>
         /// <param name="collection"></param>
         /// <param name="selector"></param>
@@ -349,6 +323,32 @@ namespace Lycoris.Common.Extensions
 
             var lambda = Expression.Lambda<Func<T, bool>>(orExpression, parameter);
             return collection.Where(lambda);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        private static Expression<Func<T, object>>? GetPropertyExpression<T>(string propertyName)
+        {
+            // 支持嵌套属性 a.b.c
+            var param = Expression.Parameter(typeof(T), "x");
+            Expression? body = param;
+
+            foreach (var part in propertyName.Split('.'))
+            {
+                var propInfo = body.Type.GetProperty(part, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+                if (propInfo == null) return null;
+                body = Expression.Property(body, propInfo);
+            }
+
+            // 如果是值类型需要装箱
+            if (body.Type.IsValueType)
+                body = Expression.Convert(body, typeof(object));
+
+            return Expression.Lambda<Func<T, object>>(body, param);
         }
 
         /// <summary>

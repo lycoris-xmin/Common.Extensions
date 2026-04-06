@@ -2,6 +2,7 @@
 using Lycoris.Common.Extensions.Builder.LinqBuilder;
 using Lycoris.Common.Extensions.Models;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Lycoris.Common.Extensions
 {
@@ -247,162 +248,67 @@ namespace Lycoris.Common.Extensions
         public static IOrWhereBuilder<T> WhereOr<T>(this IQueryable<T> source, Expression<Func<T, bool>> firstCondition) => new OrWhereBuilder<T>(source, firstCondition);
 
         /// <summary>
-        /// 条件排序（OrderBy）
+        /// 
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="source"></param>
-        /// <param name="fieldName"></param>
-        /// <param name="direction"></param>
+        /// <param name="sortFields"></param>
         /// <returns></returns>
-        public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> source, string fieldName, string direction)
+        public static IOrderedQueryable<T> SortBy<T>(this IQueryable<T> source, Dictionary<string, string> sortFields)
         {
-            return ApplyOrder(source, fieldName, direction, false);
-        }
-
-        /// <summary>
-        /// 条件排序（OrderBy）
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
-        /// <param name="condition"></param>
-        /// <param name="fieldName"></param>
-        /// <param name="direction"></param>
-        /// <returns></returns>
-        public static IOrderedQueryable<T> OrderByIf<T>(this IQueryable<T> source, bool condition, string fieldName, string direction)
-        {
-            if (!condition)
-                return source.OrderBy(x => 0);
-
-            return source.OrderBy(fieldName, direction);
-        }
-
-        /// <summary>
-        /// 条件排序（OrderBy）
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="TKey"></typeparam>
-        /// <param name="source"></param>
-        /// <param name="condition"></param>
-        /// <param name="keySelector"></param>
-        /// <param name="falsekeySelector"></param>
-        /// <returns></returns>
-        public static IOrderedQueryable<T> OrderByIf<T, TKey>(this IQueryable<T> source, bool condition, Expression<Func<T, TKey>> keySelector, Expression<Func<T, TKey>> falsekeySelector)
-        {
-            if (!condition)
-                return source.OrderBy(keySelector);
-
-            return condition ? source.OrderBy(keySelector) : source.OrderBy(falsekeySelector);
-        }
-
-        /// <summary>
-        /// 条件排序（OrderBy）
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="TKey"></typeparam>
-        /// <param name="source"></param>
-        /// <param name="condition"></param>
-        /// <param name="fieldName"></param>
-        /// <param name="direction"></param>
-        /// <param name="keySelector"></param>
-        /// <returns></returns>
-        public static IOrderedQueryable<T> OrderByIf<T, TKey>(this IQueryable<T> source, bool condition, string fieldName, string direction, Expression<Func<T, TKey>> keySelector)
-        {
-            if (!condition)
-                return source.OrderBy(keySelector);
-
-            return source.OrderBy(fieldName, direction);
-        }
-
-        /// <summary>
-        /// 条件排序（OrderByDescending）
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="TKey"></typeparam>
-        /// <param name="source"></param>
-        /// <param name="condition"></param>
-        /// <param name="keySelector"></param>
-        /// <returns></returns>
-        public static IOrderedQueryable<T> OrderByDescendingIf<T, TKey>(this IQueryable<T> source, bool condition, Expression<Func<T, TKey>> keySelector)
-        {
-            if (!condition)
-                return source.OrderBy(x => 0);
-
-            return source.OrderByDescending(keySelector);
-        }
-
-        /// <summary>
-        /// 条件排序（OrderByDescending）
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="TKey"></typeparam>
-        /// <param name="source"></param>
-        /// <param name="condition"></param>
-        /// <param name="keySelector"></param>
-        /// <param name="falsekeySelector"></param>
-        /// <returns></returns>
-        public static IOrderedQueryable<T> OrderByDescendingIf<T, TKey>(this IQueryable<T> source, bool condition, Expression<Func<T, TKey>> keySelector, Expression<Func<T, TKey>> falsekeySelector)
-        {
-            if (!condition)
-                return source.OrderBy(keySelector);
-
-            return condition ? source.OrderByDescending(keySelector) : source.OrderByDescending(falsekeySelector);
-        }
-
-        /// <summary>
-        /// 条件次排序（ThenBy）
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
-        /// <param name="fieldName"></param>
-        /// <param name="direction"></param>
-        /// <returns></returns>
-        public static IOrderedQueryable<T> ThenBy<T>(this IOrderedQueryable<T> source, string fieldName, string direction)
-        {
-            return ApplyOrder(source, fieldName, direction, true);
-        }
-
-        /// <summary>
-        /// 条件次排序（ThenBy）
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
-        /// <param name="condition"></param>
-        /// <param name="fieldName"></param>
-        /// <param name="direction"></param>
-        /// <returns></returns>
-        public static IOrderedQueryable<T> ThenByIf<T>(this IOrderedQueryable<T> source, bool condition, string fieldName, string direction)
-        {
-            if (!condition)
-                return source;
-
-            return source.ThenBy(fieldName, direction);
-        }
-
-        /// <summary>
-        /// 排序
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
-        /// <param name="orderFields"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentException"></exception>
-        /// <exception cref="InvalidOperationException"></exception>
-        public static IOrderedQueryable<T> SortBy<T>(this IQueryable<T> source, Dictionary<string, string> orderFields)
-        {
-            if (orderFields == null || orderFields.Count == 0)
-                throw new ArgumentException("the sort field cannot be empty");
+            if (sortFields == null || sortFields.Count == 0)
+                return (IOrderedQueryable<T>)source;
 
             IOrderedQueryable<T>? orderedQuery = null;
 
-            foreach (var (field, direction) in orderFields)
+            foreach (var (field, direction) in sortFields)
             {
+                var prop = GetPropertyExpression<T>(field);
+                if (prop == null) continue;
+
+                bool desc = direction.Equals("desc", StringComparison.OrdinalIgnoreCase);
+
                 if (orderedQuery == null)
-                    orderedQuery = source.OrderBy(field, direction);
+                {
+                    orderedQuery = desc
+                        ? source.OrderByDescending(prop)
+                        : source.OrderBy(prop);
+                }
                 else
-                    orderedQuery = orderedQuery.ThenBy(field, direction);
+                {
+                    orderedQuery = desc
+                        ? orderedQuery.ThenByDescending(prop)
+                        : orderedQuery.ThenBy(prop);
+                }
             }
 
-            return orderedQuery ?? throw new InvalidOperationException("unable to construct sort query");
+            return orderedQuery ?? (IOrderedQueryable<T>)source;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        private static Expression<Func<T, object>>? GetPropertyExpression<T>(string propertyName)
+        {
+            // 支持嵌套属性 a.b.c
+            var param = Expression.Parameter(typeof(T), "x");
+            Expression? body = param;
+
+            foreach (var part in propertyName.Split('.'))
+            {
+                var propInfo = body.Type.GetProperty(part, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+                if (propInfo == null) return null;
+                body = Expression.Property(body, propInfo);
+            }
+
+            // 如果是值类型需要装箱
+            if (body.Type.IsValueType)
+                body = Expression.Convert(body, typeof(object));
+
+            return Expression.Lambda<Func<T, object>>(body, param);
         }
 
         /// <summary>

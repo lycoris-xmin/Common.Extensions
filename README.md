@@ -633,3 +633,162 @@ Install-Package Lycoris.Common
 | `EncryptedFileModel` | `Lycoris.Common.Utils.Cert` | 加密文件解密结果 |
 | `ShellBashResult` | `Lycoris.Common.Helper` | Shell 命令执行结果 |
 | `ConfigUser` | `Lycoris.Common.Helper` | 独立 INI 配置文件操作实例 |
+| `SnowflakeIdInfo` | `Lycoris.Common.Snowflakes` | 雪花Id解析结果 |
+| `SnowflakeOption` | `Lycoris.Common.Snowflakes.Options` | 单机雪花Id配置 |
+| `DistributedSnowflakeOption` | `Lycoris.Common.Snowflakes.Options` | 分布式雪花Id配置 |
+
+---
+
+## 六、雪花Id (Snowflakes)
+
+基于 Twitter Snowflake 算法的分布式 Id 生成器，支持单机和分布式（Redis）两种部署模式。
+
+### 6.1 单机模式
+
+#### 注册服务
+
+```csharp
+// 注册为单例服务
+builder.Services.AddSnowflake().AsService();
+
+// 注册为静态实例
+builder.Services.AddSnowflake().AsHelper();
+
+// 详细配置
+builder.Services.AddSnowflake(opt =>
+{
+    opt.WorkId = 1;                                    // 工作机器Id，默认从1开始
+    opt.WorkIdLength = 10;                             // 工作机器Id所占用的长度，最大10，默认10
+    opt.StartTimeStamp = new DateTime(2022, 1, 1);     // 起始时间，设置为固定时间，不要设为 DateTime.Now
+}).AsService();
+```
+
+#### 使用方式
+
+```csharp
+// 单例服务注入
+public class Demo
+{
+    private readonly ISnowflakeMaker _snowflakeMaker;
+    public Demo(ISnowflakeMaker snowflakeMaker) => _snowflakeMaker = snowflakeMaker;
+
+    public long GetId() => _snowflakeMaker.GetNextId();
+    public async Task<long> GetIdAsync() => await _snowflakeMaker.GetNextIdAsync();
+}
+
+// 静态实例
+public class Demo
+{
+    public long GetId() => SnowflakeHelper.GetNextId();
+    public async Task<long> GetIdAsync() => await SnowflakeHelper.GetNextIdAsync();
+
+    // 批量获取
+    public long[] GetBatch() => SnowflakeHelper.GetNextIds(100);
+
+    // 解析Id
+    public SnowflakeIdInfo Parse(long id) => SnowflakeHelper.Parse(id);
+}
+```
+
+### 6.2 分布式模式（Redis）
+
+分布式模式需要 Redis 辅助分配机器Id，需实现 `IDistributedSnowflakesRedis` 接口。
+
+#### 实现 Redis 辅助服务
+
+```csharp
+// 以 CSRedisCore 为例
+public class DistributedSnowflakesRedis : IDistributedSnowflakesRedis
+{
+    private readonly CSRedisClient client;
+
+    public DistributedSnowflakesRedis()
+    {
+        client = new CSRedisClient("host:port,password=password,defaultDatabase=0");
+    }
+
+    public Task<bool> ExpireAsync(string key, TimeSpan expire) => client.ExpireAsync(key, expire);
+    public Task<long> IncrByAsync(string key, long value) => client.IncrByAsync(key, value);
+    public Task<long> ZAddAsync(string key, params (decimal, object)[] scoreMembers) => client.ZAddAsync(key, scoreMembers);
+    public Task<long> ZRemAsync<T>(string key, params T[] member) => client.ZRemAsync(key, member);
+    public Task<(string member, decimal score)[]> ZRangeByScoreWithScoresAsync(string key, decimal min, decimal max, long? count = null, long offset = 0)
+        => client.ZRangeByScoreWithScoresAsync(key, min, max, count, offset);
+}
+```
+
+#### 单例服务模式
+
+```csharp
+// 注册
+builder.Services.AddDistributedSnowflake(opt =>
+{
+    opt.WorkId = 1;
+    opt.WorkIdLength = 10;
+    opt.StartTimeStamp = new DateTime(2022, 1, 1);
+    opt.RedisPrefix = "MyService";                     // 集群标识前缀
+    opt.RefreshAliveInterval = TimeSpan.FromHours(1);  // 心跳间隔，默认1小时
+})
+.AddSnowflakesRedisService<DistributedSnowflakesRedis>()
+.AsService();
+
+// 使用：同单机模式的单例服务
+```
+
+#### 静态实例模式
+
+```csharp
+// 无参构造函数
+builder.Services.AddDistributedSnowflake()
+    .AddSnowflakesRedisHelper<DistributedSnowflakesRedis>()
+    .AsHelper();
+
+// 有参构造函数
+var redisHelper = new DistributedSnowflakesRedis(redis, ...);
+builder.Services.AddDistributedSnowflake()
+    .AddSnowflakesRedisHelper(redisHelper)
+    .AsHelper();
+
+// 使用
+var id = DistributedSnowflakeHelper.GetNextId();
+var batch = DistributedSnowflakeHelper.GetNextIds(100);
+var info = DistributedSnowflakeHelper.Parse(id);
+```
+
+### 6.3 接口一览
+
+| 类/接口 | 说明 |
+|------|------|
+| `ISnowflakeMaker` | 雪花Id生成器接口 |
+| `SnowflakeHelper` | 单机静态帮助类 |
+| `SnowflakesMakerService` | 单机DI服务 |
+| `DistributedSnowflakeHelper` | 分布式静态帮助类 |
+| `DistributedSnowflakeService` | 分布式DI服务 |
+| `IDistributedSnowflakesRedis` | 分布式Redis操作接口（需自行实现） |
+| `IDistributedSnowflakesSupport` | 分布式支持接口 |
+| `SnowflakeIdInfo` | Id解析结果（Timestamp, WorkId, Sequence） |
+
+---
+
+## 开源协议
+
+MIT License
+
+Copyright (c) 2023 lycoris
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

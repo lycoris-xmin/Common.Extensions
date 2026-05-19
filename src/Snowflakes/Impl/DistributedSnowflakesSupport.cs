@@ -2,6 +2,9 @@ using Lycoris.Common.Snowflakes.Options;
 
 namespace Lycoris.Common.Snowflakes.Impl;
 
+/// <summary>
+/// 分布式雪花Id Redis支持实现
+/// </summary>
 public sealed class DistributedSnowflakesSupport : IDistributedSnowflakesSupport
 {
     private readonly IDistributedSnowflakesRedis _distributedRedis;
@@ -10,6 +13,11 @@ public sealed class DistributedSnowflakesSupport : IDistributedSnowflakesSupport
     private int _workId;
     private readonly DistributedSnowflakeOption _option;
 
+    /// <summary>
+    /// 构造函数
+    /// </summary>
+    /// <param name="option">分布式雪花Id配置</param>
+    /// <param name="distributedRedis">分布式Redis操作接口</param>
     public DistributedSnowflakesSupport(DistributedSnowflakeOption option, IDistributedSnowflakesRedis distributedRedis)
     {
         _option = option;
@@ -18,6 +26,7 @@ public sealed class DistributedSnowflakesSupport : IDistributedSnowflakesSupport
         _inUse = $"{_option.RedisPrefix}:Use";
     }
 
+    /// <inheritdoc />
     public async Task<int> GetNextWorkIdAsync()
     {
         var cache = await StringIncrementAsync(_currentWorkIndex);
@@ -38,11 +47,13 @@ public sealed class DistributedSnowflakesSupport : IDistributedSnowflakesSupport
         return _workId;
     }
 
+    /// <inheritdoc />
     public async Task RefreshAliveAsync()
     {
         await _distributedRedis.ZAddAsync(_inUse, (GetTimestamp(), _workId.ToString()));
     }
 
+    /// <inheritdoc />
     public async Task RemoveNotAliveWorkNodeAsync()
     {
         var startScore = DateTime.Now.AddSeconds(-1801).AddSeconds(-(int)Math.Ceiling(_option.RefreshAliveInterval.TotalSeconds));

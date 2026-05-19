@@ -7,13 +7,25 @@ using Microsoft.Extensions.Options;
 
 namespace Lycoris.Common.Snowflakes;
 
+/// <summary>
+/// 雪花Id服务注册扩展
+/// </summary>
 public static class SnowflakesBuilderExtensions
 {
     // === Standalone ===
 
+    /// <summary>
+    /// 添加单机雪花Id服务
+    /// </summary>
+    /// <param name="services">服务集合</param>
     public static SnowflakeOptionBuilder AddSnowflake(this IServiceCollection services)
         => new(services);
 
+    /// <summary>
+    /// 添加单机雪花Id服务
+    /// </summary>
+    /// <param name="services">服务集合</param>
+    /// <param name="configure">配置操作</param>
     public static SnowflakeOptionBuilder AddSnowflake(this IServiceCollection services, Action<SnowflakeOptionBuilder> configure)
     {
         var builder = new SnowflakeOptionBuilder(services);
@@ -21,6 +33,10 @@ public static class SnowflakesBuilderExtensions
         return builder;
     }
 
+    /// <summary>
+    /// 注册为单例服务
+    /// </summary>
+    /// <param name="builder">配置构建器</param>
     public static IServiceCollection AsService(this SnowflakeOptionBuilder builder)
     {
         if (SnowflakeHelper.HelperEnabled)
@@ -37,6 +53,10 @@ public static class SnowflakesBuilderExtensions
         return builder.Services;
     }
 
+    /// <summary>
+    /// 注册为静态实例
+    /// </summary>
+    /// <param name="builder">配置构建器</param>
     public static IServiceCollection AsHelper(this SnowflakeOptionBuilder builder)
     {
         if (builder.Services.Any(s => s.ImplementationType == typeof(SnowflakesMakerService)))
@@ -48,9 +68,18 @@ public static class SnowflakesBuilderExtensions
 
     // === Distributed ===
 
+    /// <summary>
+    /// 添加分布式雪花Id服务
+    /// </summary>
+    /// <param name="services">服务集合</param>
     public static DistributedSnowflakeOptionBuilder AddDistributedSnowflake(this IServiceCollection services)
         => new(services);
 
+    /// <summary>
+    /// 添加分布式雪花Id服务
+    /// </summary>
+    /// <param name="services">服务集合</param>
+    /// <param name="configure">配置操作</param>
     public static DistributedSnowflakeOptionBuilder AddDistributedSnowflake(this IServiceCollection services, Action<DistributedSnowflakeOptionBuilder> configure)
     {
         var builder = new DistributedSnowflakeOptionBuilder(services);
@@ -58,6 +87,11 @@ public static class SnowflakesBuilderExtensions
         return builder;
     }
 
+    /// <summary>
+    /// 添加分布式雪花Id Redis服务（单例模式）
+    /// </summary>
+    /// <typeparam name="T">Redis服务类型</typeparam>
+    /// <param name="builder">配置构建器</param>
     public static DistributedSnowflakeOptionBuilder AddSnowflakesRedisService<T>(this DistributedSnowflakeOptionBuilder builder)
         where T : IDistributedSnowflakesRedis
     {
@@ -65,6 +99,10 @@ public static class SnowflakesBuilderExtensions
         return builder;
     }
 
+    /// <summary>
+    /// 注册为单例服务
+    /// </summary>
+    /// <param name="builder">配置构建器</param>
     public static IServiceCollection AsService(this DistributedSnowflakeOptionBuilder builder)
     {
         if (DistributedSnowflakeHelper.HelperEnabled)
@@ -102,6 +140,11 @@ public static class SnowflakesBuilderExtensions
         return builder.Services;
     }
 
+    /// <summary>
+    /// 添加分布式雪花Id Redis服务（静态实例模式）
+    /// </summary>
+    /// <typeparam name="T">Redis服务类型</typeparam>
+    /// <param name="builder">配置构建器</param>
     public static DistributedSnowflakeOptionBuilder AddSnowflakesRedisHelper<T>(this DistributedSnowflakeOptionBuilder builder)
         where T : IDistributedSnowflakesRedis, new()
     {
@@ -109,6 +152,12 @@ public static class SnowflakesBuilderExtensions
         return builder;
     }
 
+    /// <summary>
+    /// 添加分布式雪花Id Redis服务（静态实例模式）
+    /// </summary>
+    /// <typeparam name="T">Redis服务类型</typeparam>
+    /// <param name="builder">配置构建器</param>
+    /// <param name="redisHelper">Redis帮助类实例</param>
     public static DistributedSnowflakeOptionBuilder AddSnowflakesRedisHelper<T>(this DistributedSnowflakeOptionBuilder builder, T redisHelper)
         where T : IDistributedSnowflakesRedis
     {
@@ -116,6 +165,10 @@ public static class SnowflakesBuilderExtensions
         return builder;
     }
 
+    /// <summary>
+    /// 注册为静态实例
+    /// </summary>
+    /// <param name="builder">配置构建器</param>
     public static IServiceCollection AsHelper(this DistributedSnowflakeOptionBuilder builder)
     {
         if (builder.Services.Any(s => s.ImplementationType == typeof(DistributedSnowflakeService)))

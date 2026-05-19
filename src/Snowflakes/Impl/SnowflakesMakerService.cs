@@ -4,17 +4,31 @@ using Microsoft.Extensions.Options;
 
 namespace Lycoris.Common.Snowflakes.Impl;
 
-public class DistributedSnowflakeService : ISnowflakeMaker
+/// <summary>
+/// 单机雪花Id生成服务
+/// </summary>
+public sealed class SnowflakesMakerService : ISnowflakeMaker
 {
     private readonly SnowflakeIdGenerator _generator;
 
-    public DistributedSnowflakeService(IOptions<DistributedSnowflakeOption> options, IDistributedSnowflakesSupport distributedSupport)
+    /// <summary>
+    /// 构造函数
+    /// </summary>
+    /// <param name="options">雪花Id配置</param>
+    public SnowflakesMakerService(IOptions<SnowflakeOption> options)
     {
-        _generator = new SnowflakeIdGenerator(options.Value, async () => await distributedSupport.GetNextWorkIdAsync());
+        _generator = new SnowflakeIdGenerator(options.Value);
     }
 
+    /// <inheritdoc />
     public long GetNextId() => _generator.Next();
+
+    /// <inheritdoc />
     public Task<long> GetNextIdAsync() => _generator.NextAsync();
+
+    /// <inheritdoc />
     public long GetNextId(int? workId) => _generator.Next(workId);
+
+    /// <inheritdoc />
     public Task<long> GetNextIdAsync(int? workId) => _generator.NextAsync(workId);
 }

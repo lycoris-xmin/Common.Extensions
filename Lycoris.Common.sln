@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9553A3D8-D62
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{3BE2A788-1AA9-48BB-A828-DCDE87100A02}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lycoris.Common", "src\Lycoris.Common\Lycoris.Common.csproj", "{9555F3B7-71FF-42A3-B6DF-ABCCC4DE4AB6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lycoris.Common", "src\Lycoris.Common.csproj", "{9555F3B7-71FF-42A3-B6DF-ABCCC4DE4AB6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample", "samples\Sample\Sample.csproj", "{0DB02CE0-1CA7-444E-979D-9E33C8E2E7B4}"
 EndProject

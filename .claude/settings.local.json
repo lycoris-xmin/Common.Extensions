@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet restore *)",
+      "Bash(dotnet build *)",
+      "Bash(git *)",
+      "Bash(rmdir /s /q \"src\\\\Lycoris.Common\")",
+      "Bash(echo \"exit: $?\")"
+    ]
+  }
+}

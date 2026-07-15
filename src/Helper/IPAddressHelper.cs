@@ -170,6 +170,7 @@ namespace Lycoris.Common.Helper
                 AddressFamily.InterNetwork => bytes[0] switch
                 {
                     10 => true,
+                    127 => true,
                     172 when bytes[1] >= 16 && bytes[1] <= 31 => true,
                     192 when bytes[1] == 168 => true,
                     _ => false
@@ -186,7 +187,13 @@ namespace Lycoris.Common.Helper
         /// <returns>归属地信息</returns>
         public static IpAttribution Search(string ipAddress)
         {
-            return Search(IPAddress.Parse(ipAddress));
+            if (ipAddress.IsNullOrEmpty())
+                return new IpAttribution(ipAddress ?? "");
+
+            if (!IPAddress.TryParse(ipAddress, out var address))
+                return new IpAttribution(ipAddress);
+
+            return Search(address);
         }
 
         /// <summary>
@@ -207,24 +214,31 @@ namespace Lycoris.Common.Helper
         /// </summary>
         private static IpAttribution SearchByFamily(IPAddress address)
         {
-            var searcher = address.AddressFamily == AddressFamily.InterNetworkV6 ? _ip2RegionV6 : _ip2RegionV4;
-            var result = searcher.Search(address);
-
-            var ipStr = address.ToString();
-
-            if (string.IsNullOrEmpty(result))
-                return new IpAttribution(ipStr);
-
-            // region format: Country|Province|City|ISP|CountryCode
-            var parts = result.Split('|');
-
-            return new IpAttribution(ipStr)
+            try
             {
-                Country = parts.Length > 0 && parts[0] != "0" ? parts[0] : null,
-                Province = parts.Length > 1 && parts[1] != "0" ? parts[1] : null,
-                City = parts.Length > 2 && parts[2] != "0" ? parts[2] : null,
-                Operator = parts.Length > 3 && parts[3] != "0" ? parts[3] : null,
-            };
+                var searcher = address.AddressFamily == AddressFamily.InterNetworkV6 ? _ip2RegionV6 : _ip2RegionV4;
+                var result = searcher.Search(address);
+
+                var ipStr = address.ToString();
+
+                if (string.IsNullOrEmpty(result))
+                    return new IpAttribution(ipStr);
+
+                // region format: Country|Province|City|ISP|CountryCode
+                var parts = result.Split('|');
+
+                return new IpAttribution(ipStr)
+                {
+                    Country = parts.Length > 0 && parts[0] != "0" ? parts[0] : null,
+                    Province = parts.Length > 1 && parts[1] != "0" ? parts[1] : null,
+                    City = parts.Length > 2 && parts[2] != "0" ? parts[2] : null,
+                    Operator = parts.Length > 3 && parts[3] != "0" ? parts[3] : null,
+                };
+            }
+            catch
+            {
+                return new IpAttribution(address.ToString());
+            }
         }
 
         /// <summary>

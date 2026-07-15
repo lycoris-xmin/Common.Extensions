@@ -1,6 +1,4 @@
-using System;
-
-namespace Lycoris.Common.Snowflakes.Options;
+﻿namespace Lycoris.Common.Snowflakes.Options;
 
 /// <summary>
 /// 雪花Id配置

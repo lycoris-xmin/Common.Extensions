@@ -118,11 +118,11 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="maxmind" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Country.mmdb;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="ip2region_v4" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ip2region_v4.xdb;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ip2region" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ip2region.xdb;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="ip2region_v6" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ip2region_v6.xdb;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="sensitive_words" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\sensitive_words.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>

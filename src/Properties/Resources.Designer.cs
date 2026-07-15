@@ -63,19 +63,19 @@ namespace Lycoris.Common.Properties {
         /// <summary>
         ///   查找 System.Byte[] 类型的本地化资源。
         /// </summary>
-        internal static byte[] ip2region {
+        internal static byte[] ip2region_v4 {
             get {
-                object obj = ResourceManager.GetObject("ip2region", resourceCulture);
+                object obj = ResourceManager.GetObject("ip2region_v4", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-        
+
         /// <summary>
         ///   查找 System.Byte[] 类型的本地化资源。
         /// </summary>
-        internal static byte[] maxmind {
+        internal static byte[] ip2region_v6 {
             get {
-                object obj = ResourceManager.GetObject("maxmind", resourceCulture);
+                object obj = ResourceManager.GetObject("ip2region_v6", resourceCulture);
                 return ((byte[])(obj));
             }
         }
